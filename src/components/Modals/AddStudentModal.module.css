@@ -1,0 +1,97 @@
+/* Modal Title */
+.title {
+  font-weight: 600;
+  color: #4e54c8;
+}
+
+/* Accordion Section Header */
+.accordionHeader {
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Accordion Body (content inside each section) */
+.accordionBody {
+  padding: 10px 0;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+/* Form Control Styling */
+.formControl {
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box; /* ⭐ key fix */
+}
+
+/* Textarea Specific */
+.textArea {
+  min-height: 80px;
+  resize: none;
+}
+
+/* Footer Buttons */
+.footerBtn {
+  min-width: 110px;
+  height: 38px;              /* tablet height */
+  border-radius: 999px !important;;      /* ⭐ pill / tablet shape */
+  font-weight: 500;
+  padding: 0 22px !important;      /* horizontal padding */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Save Button Specific */
+.saveBtn {
+  background-color: #4e54c8;
+  border: none;
+  color: white;
+}
+
+.saveBtn:hover {
+  background-color: #3b40a4;
+}
+
+/* Accordion customization to make default collapsed */
+.accordion-button:not(.collapsed) {
+  background-color: #4e54c8;
+  color: white;
+}
+
+.accordion-button {
+  border-radius: 6px;
+  background-color: #e9ecef;
+  color: #333;
+  font-weight: 500;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+}
+
+.accordion-item {
+  border: none;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    max-width: 95%;
+    margin: 10px auto;
+  }
+
+  .modal-body {
+    padding: 12px;
+  }
+
+  .formControl {
+    font-size: 13px;
+    padding: 8px;
+  }
+}

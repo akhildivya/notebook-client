@@ -1,0 +1,79 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 90px;
+}
+
+.btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  font-size: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+/* Common hover animation */
+.btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+.btn span {
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+/* Button color variants */
+.addBtn {
+  background: #4e54c8; /* blue */
+}
+
+.searchBtn {
+  background: #27ae60; /* green */
+}
+
+.historyBtn {
+  background: #e67e22; /* orange */
+}
+
+/* ✨ Individual hover colors */
+.addBtn:hover {
+  background: #3b40a4; /* darker blue */
+}
+
+.searchBtn:hover {
+  background: #1e8f4d; /* darker green */
+}
+
+.historyBtn:hover {
+  background: #cf711f; /* darker orange */
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  .container {
+    margin-top: 40px;
+    gap: 20px;
+  }
+
+  .btn {
+    width: 100px;
+    height: 100px;
+    font-size: 20px;
+  }
+
+  .btn span {
+    font-size: 13px;
+  }
+}
