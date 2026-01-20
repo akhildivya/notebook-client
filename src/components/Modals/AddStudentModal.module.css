@@ -79,7 +79,15 @@
   border: none;
   margin-bottom: 8px;
 }
+.datePicker {
+  width: 100%;
+}
 
+.datePicker :global(.react-datepicker-wrapper),
+.datePicker :global(.react-datepicker__input-container),
+.datePicker input {
+  width: 100%;
+}
 @media (max-width: 576px) {
   .modal-dialog {
     max-width: 95%;

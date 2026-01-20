@@ -4,11 +4,31 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Accordion from "react-bootstrap/Accordion";
 import styles from "./AddStudentModal.module.css";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 function AddStudentModal({ show, onHide }) {
     const [paymentType, setPaymentType] = useState(""); // "Paid" or "Agreed"
     const [callbackArranged, setCallbackArranged] = useState(false);
-    const [callMade, setCallMade] = useState(false);
+    const [paidDateTime, setPaidDateTime] = useState(null);
+    const [contacts, setContacts] = useState([
+        { phone: "", relation: "Father" }
+    ]);
+const [callbackDateTime, setCallbackDateTime] = useState(null);
+
+    const handleContactChange = (index, field, value) => {
+        const updated = [...contacts];
+        updated[index][field] = value;
+        setContacts(updated);
+    };
+
+    const addContact = () => {
+        setContacts([...contacts, { phone: "", relation: "Father" }]);
+    };
+
+    const removeContact = (index) => {
+        const updated = contacts.filter((_, i) => i !== index);
+        setContacts(updated);
+    };
 
     return (
         <Modal show={show} onHide={onHide} size="lg" centered>
@@ -28,6 +48,52 @@ function AddStudentModal({ show, onHide }) {
                                 <Form.Control placeholder="Student Name" className={`mb-2 ${styles.formControl}`} />
                                 <Form.Control placeholder="Father's Name" className={`mb-2 ${styles.formControl}`} />
                                 <Form.Control placeholder="Mother's Name" className={`mb-2 ${styles.formControl}`} />
+                                <Form.Label className="mt-2 fw-semibold">Associated Contact Numbers</Form.Label>
+
+                                {contacts.map((contact, index) => (
+                                    <div key={index} className="d-flex gap-2 mb-2">
+                                        <Form.Control
+                                            type="tel"
+                                            placeholder="Phone Number"
+                                            value={contact.phone}
+                                            onChange={(e) =>
+                                                handleContactChange(index, "phone", e.target.value)
+                                            }
+                                            className={styles.formControl}
+                                        />
+
+                                        <Form.Select
+                                            value={contact.relation}
+                                            onChange={(e) =>
+                                                handleContactChange(index, "relation", e.target.value)
+                                            }
+                                            className={styles.formControl}
+                                        >
+                                            <option>Father</option>
+                                            <option>Mother</option>
+                                            <option>Guardian</option>
+                                            <option>Other</option>
+                                        </Form.Select>
+
+                                        {contacts.length > 1 && (
+                                            <Button
+                                                variant="outline-danger"
+                                                onClick={() => removeContact(index)}
+                                            >
+                                                ✕
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={addContact}
+                                    className="mb-2"
+                                >
+                                    + Add Another Contact
+                                </Button>
                                 <Form.Control placeholder="Institution" className={`mb-2 ${styles.formControl}`} />
                                 <Form.Select className={`mb-2 ${styles.formControl}`}>
 
@@ -60,7 +126,7 @@ function AddStudentModal({ show, onHide }) {
 
                                 <Form.Control
                                     as="textarea"
-                                    placeholder="Remarks"
+                                    placeholder="Remarks like chapter wise crash course"
                                     className={`${styles.formControl} ${styles.textArea}`}
                                 />
                             </Form>
@@ -87,7 +153,18 @@ function AddStudentModal({ show, onHide }) {
                                 {paymentType === "Paid" && (
                                     <>
                                         <Form.Control placeholder="Amount Paid" className={`mb-2 ${styles.formControl}`} />
-                                        <Form.Control type="date" className={`mb-2 ${styles.formControl}`} />
+                                        <div className={`${styles.datePicker} mb-2`}>
+                                            <DatePicker
+                                                selected={paidDateTime}
+                                                onChange={(date) => setPaidDateTime(date)}
+                                                showTimeSelect
+                                                timeFormat="hh:mm aa"
+                                                timeIntervals={15}
+                                                dateFormat="dd/MM/yyyy hh:mm aa"
+                                                placeholderText="Select Date & Time"
+                                                className={`form-control ${styles.formControl}`}
+                                            />
+                                        </div>
                                     </>
                                 )}
 
@@ -122,27 +199,18 @@ function AddStudentModal({ show, onHide }) {
                                 />
 
                                 {callbackArranged && (
-                                    <>
-                                        <Form.Control type="date" className={`mb-2 ${styles.formControl}`} placeholder="Call Back Date" />
-                                        <Form.Control type="time" className={`mb-2 ${styles.formControl}`} placeholder="Call Back Time" />
-                                        <Form.Control placeholder="Caller Person (Employee)" className={`mb-2 ${styles.formControl}`} />
-
-                                        <Form.Check
-                                            type="checkbox"
-                                            label="Call Made?"
-                                            checked={callMade}
-                                            onChange={() => setCallMade(!callMade)}
-                                            className="mb-2"
-                                        />
-
-                                        {callMade && (
-                                            <>
-                                                <Form.Control type="date" className={`mb-2 ${styles.formControl}`} placeholder="Call Date" />
-                                                <Form.Control type="time" className={`mb-2 ${styles.formControl}`} placeholder="Call Time" />
-                                                <Form.Control placeholder="Handler Name (Employee)" className={`mb-2 ${styles.formControl}`} />
-                                            </>
-                                        )}
-                                    </>
+                                    <div className={`${styles.datePicker} mb-2`}>
+      <DatePicker
+        selected={callbackDateTime}
+        onChange={(date) => setCallbackDateTime(date)}
+        showTimeSelect
+        timeFormat="hh:mm aa"
+        timeIntervals={15}
+        dateFormat="dd/MM/yyyy hh:mm aa"
+        placeholderText="Call Back Date & Time"
+        className={`form-control ${styles.formControl}`}
+      />
+    </div>
                                 )}
                             </Form>
                         </Accordion.Body>
