@@ -6,7 +6,35 @@ import Accordion from "react-bootstrap/Accordion";
 import styles from "./AddStudentModal.module.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios";
+import { BASEURL } from "../../service/baseUrl";
+import { toast } from "react-toastify";
+import Dropdown from "react-bootstrap/Dropdown";
+
 function AddStudentModal({ show, onHide }) {
+
+    const districts = [
+        "Thiruvananthapuram",
+        "Kollam",
+        "Pathanamthitta",
+        "Alappuzha",
+        "Kottayam",
+        "Idukki",
+        "Ernakulam",
+        "Thrissur",
+        "Palakkad",
+        "Malappuram",
+        "Kozikkode",
+        "Wayanad",
+        "Kannur",
+        "Kasaragod"
+    ];
+
+    const classLevels = ["Plus One", "Plus Two", "BTech"];
+    const syllabusOptions = ["CBSE", "ICSE", "HSE", "KTU"];
+    const relationOptions = ["Father", "Mother", "Guardian", "Other"];
+    const paymentOptions = ["Paid", "Agreed"];
+
     const [paymentType, setPaymentType] = useState(""); // "Paid" or "Agreed"
 
     const [paidDateTime, setPaidDateTime] = useState(null);
@@ -24,6 +52,14 @@ function AddStudentModal({ show, onHide }) {
     const [callbackCaller, setCallbackCaller] = useState("");
     const [callbackCallType, setCallbackCallType] = useState("Outgoing");
     const [callbackArranged, setCallbackArranged] = useState("No"); // "Yes" | "No"
+    const [studentName, setStudentName] = useState("");
+    const [fatherName, setFatherName] = useState("");
+    const [motherName, setMotherName] = useState("");
+    const [institution, setInstitution] = useState("");
+    const [district, setDistrict] = useState("");
+    const [classLevel, setClassLevel] = useState("");
+    const [syllabus, setSyllabus] = useState("");
+    const [remarks, setRemarks] = useState("");
     const textRegex = /^[A-Za-z.,\-\s]*$/;
     const numberRegex = /^[0-9]*$/;
 
@@ -73,6 +109,61 @@ function AddStudentModal({ show, onHide }) {
         setContacts(updated);
     };
 
+
+    const handleSaveStudent = async () => {
+        try {
+            const cleanedContacts = contacts.filter(
+                c => c.phone && c.phone.trim() !== ""
+            );
+
+            const payload = {
+                studentName,
+                fatherName,
+                motherName,
+                contacts: cleanedContacts,
+
+                institution,
+                district,
+                classLevel,
+                syllabus,
+                remarks,
+
+                payment: paymentType
+                    ? {
+                        type: paymentType,
+                        totalAmount: paymentType === "Paid" ? totalAmount : undefined,
+                        paidAmount: paymentType === "Paid" ? paidAmount : undefined,
+                        agreedAmount: paymentType === "Agreed" ? agreedAmount : undefined,
+                        dateTime: paidDateTime,
+                        method: paymentMethod,
+                        status: paymentStatus
+                    }
+                    : undefined,
+
+                callback:
+                    callbackArranged === "Yes"
+                        ? {
+                            arranged: "Yes",
+                            dateTime: callbackDateTime,
+                            handler: callbackHandler,
+                            caller: callbackCaller,
+                            callType: callbackCallType
+                        }
+                        : {
+                            arranged: "No"
+                        }
+            };
+
+            await axios.post(`${BASEURL}/create-student`, payload);
+            toast.success("Student added successfully ✅", { position: 'top-center' });
+            onHide();
+        } catch (err) {
+
+            toast.error(err.response?.data?.error || "Failed to save student", { position: 'top-center' });
+        }
+    };
+
+
     return (
         <Modal show={show} onHide={onHide} size="lg" centered>
             <Modal.Header closeButton>
@@ -88,13 +179,13 @@ function AddStudentModal({ show, onHide }) {
                         </Accordion.Header>
                         <Accordion.Body className={styles.accordionBody}>
                             <Form>
-                                <Form.Control placeholder="Student Name" className={`mb-2 ${styles.formControl}`} onChange={handleTextChange("studentName", () => { })} />
+                                <Form.Control placeholder="Student Name" className={`mb-2 ${styles.formControl}`} onChange={handleTextChange("studentName", setStudentName)} />
                                 {errors.studentName && (
                                     <div className={styles.warning}>{errors.studentName}</div>
                                 )}
-                                <Form.Control placeholder="Father's Name" className={`mb-2 ${styles.formControl}`} onChange={handleTextChange("fatherName", () => { })} />
+                                <Form.Control placeholder="Father's Name" className={`mb-2 ${styles.formControl}`} onChange={handleTextChange("fatherName", setFatherName)} />
                                 {errors.fatherName && <div className={styles.warning}>{errors.fatherName}</div>}
-                                <Form.Control placeholder="Mother's Name" className={`mb-2 ${styles.formControl}`} onChange={handleTextChange("motherName", () => { })} />
+                                <Form.Control placeholder="Mother's Name" className={`mb-2 ${styles.formControl}`} onChange={handleTextChange("motherName", setMotherName)} />
                                 {errors.motherName && <div className={styles.warning}>{errors.motherName}</div>}
                                 <Form.Label className="mt-2 fw-semibold">Associated Contact Numbers</Form.Label>
 
@@ -110,18 +201,27 @@ function AddStudentModal({ show, onHide }) {
                                             className={styles.formControl}
                                         />
 
-                                        <Form.Select
-                                            value={contact.relation}
-                                            onChange={(e) =>
-                                                handleContactChange(index, "relation", e.target.value)
-                                            }
-                                            className={styles.formControl}
-                                        >
-                                            <option>Father</option>
-                                            <option>Mother</option>
-                                            <option>Guardian</option>
-                                            <option>Other</option>
-                                        </Form.Select>
+                                        <Dropdown className="w-100">
+                                            <Dropdown.Toggle
+                                                variant="outline-secondary"
+                                                className={`${styles.formControl} w-100 text-start`}
+                                            >
+                                                {contact.relation || "-- Select Relation --"}
+                                            </Dropdown.Toggle>
+
+                                            <Dropdown.Menu className="w-100">
+                                                {relationOptions.map((rel) => (
+                                                    <Dropdown.Item
+                                                        key={rel}
+                                                        onClick={() =>
+                                                            handleContactChange(index, "relation", rel)
+                                                        }
+                                                    >
+                                                        {rel}
+                                                    </Dropdown.Item>
+                                                ))}
+                                            </Dropdown.Menu>
+                                        </Dropdown>
 
                                         {contacts.length > 1 && (
                                             <Button
@@ -142,44 +242,73 @@ function AddStudentModal({ show, onHide }) {
                                 >
                                     + Add Another Contact
                                 </Button>
-                                <Form.Control placeholder="Institution" className={`mb-2 ${styles.formControl}`} onChange={handleTextChange("institution", () => { })} />
+                                <Form.Control placeholder="Institution" className={`mb-2 ${styles.formControl}`} onChange={handleTextChange("institution", setInstitution)} />
                                 {errors.institution && <div className={styles.warning}>{errors.institution}</div>}
-                                <Form.Select className={`mb-2 ${styles.formControl}`}>
+                                <Dropdown className="mb-2 w-100">
+                                    <Dropdown.Toggle
+                                        variant="outline-secondary"
+                                        className={`${styles.formControl} w-100 text-start`}
+                                    >
+                                        {district || "-- Select District --"}
+                                    </Dropdown.Toggle>
 
-                                    <option value="District 1">Thiruvananthapuram</option>
-                                    <option value="District 2">Kollam</option>
-                                    <option value="District 3">Pathanamthitta</option>
-                                    <option value="District 4">Alappuzha</option>
-                                    <option value="District 5">Kottayam</option>
-                                    <option value="District 6">Idukki</option>
-                                    <option value="District 7">Ernakulam</option>
-                                    <option value="District 8">Thrissur</option>
-                                    <option value="District 9">Palakkad</option>
-                                    <option value="District 10">Malappuram</option>
-                                    <option value="District 11">Kozikkode</option>
-                                    <option value="District 12">Wayanad</option>
-                                    <option value="District 13">Kannur</option>
-                                    <option value="District 14">Kasaragod</option>
-                                </Form.Select>
+                                    <Dropdown.Menu className="w-100">
+                                        {districts.map((dist) => (
+                                            <Dropdown.Item
+                                                key={dist}
+                                                onClick={() => setDistrict(dist)}
+                                            >
+                                                {dist}
+                                            </Dropdown.Item>
+                                        ))}
+                                    </Dropdown.Menu>
+                                </Dropdown>
 
-                                <Form.Select className={`mb-2 ${styles.formControl}`}>
-                                    <option>Plus one</option>
-                                    <option>Plus Two</option>
-                                    <option>Btech</option>
-                                </Form.Select>
+                                <Dropdown className="mb-2 w-100">
+                                    <Dropdown.Toggle
+                                        variant="outline-secondary"
+                                        className={`${styles.formControl} w-100 text-start`}
+                                    >
+                                        {classLevel || "-- Select Class --"}
+                                    </Dropdown.Toggle>
 
-                                <Form.Select className={`mb-2 ${styles.formControl}`}>
-                                    <option>CBSE</option>
-                                    <option>ICSE</option>
-                                    <option>HSE</option>
-                                    <option>KTU</option>
-                                </Form.Select>
+                                    <Dropdown.Menu className="w-100">
+                                        {classLevels.map((cls) => (
+                                            <Dropdown.Item
+                                                key={cls}
+                                                onClick={() => setClassLevel(cls)}
+                                            >
+                                                {cls}
+                                            </Dropdown.Item>
+                                        ))}
+                                    </Dropdown.Menu>
+                                </Dropdown>
+
+                                <Dropdown className="mb-2 w-100">
+                                    <Dropdown.Toggle
+                                        variant="outline-secondary"
+                                        className={`${styles.formControl} w-100 text-start`}
+                                    >
+                                        {syllabus || "-- Select Syllabus --"}
+                                    </Dropdown.Toggle>
+
+                                    <Dropdown.Menu className="w-100">
+                                        {syllabusOptions.map((item) => (
+                                            <Dropdown.Item
+                                                key={item}
+                                                onClick={() => setSyllabus(item)}
+                                            >
+                                                {item}
+                                            </Dropdown.Item>
+                                        ))}
+                                    </Dropdown.Menu>
+                                </Dropdown>
 
                                 <Form.Control
                                     as="textarea"
                                     placeholder="Remarks like chapter wise crash course"
                                     className={`${styles.formControl} ${styles.textArea}`}
-                                    onChange={handleTextChange("remarks", () => { })}
+                                    onChange={handleTextChange("remarks", setRemarks)}
                                 />
                                 {errors.remarks && <div className={styles.warning}>{errors.remarks}</div>}
                             </Form>
@@ -196,18 +325,29 @@ function AddStudentModal({ show, onHide }) {
                             <Form>
 
                                 {/* PAYMENT TYPE */}
-                                <Form.Select
-                                    className={`mb-3 ${styles.formControl}`}
-                                    value={paymentType}
-                                    onChange={(e) => {
-                                        setPaymentType(e.target.value);
-                                        setPaymentStatus("Pending");
-                                    }}
-                                >
-                                    <option value="">----</option>
-                                    <option value="Paid">Paid</option>
-                                    <option value="Agreed">Agreed</option>
-                                </Form.Select>
+                                <Dropdown className="mb-3 w-100">
+                                    <Dropdown.Toggle
+                                        variant="outline-secondary"
+                                        className={`${styles.formControl} w-100 text-start`}
+                                    >
+                                        {paymentType || "----"}
+                                    </Dropdown.Toggle>
+
+                                    <Dropdown.Menu className="w-100">
+                                        
+                                        {paymentOptions.map((type) => (
+                                            <Dropdown.Item
+                                                key={type}
+                                                onClick={() => {
+                                                    setPaymentType(type);
+                                                    setPaymentStatus("Pending");
+                                                }}
+                                            >
+                                                {type}
+                                            </Dropdown.Item>
+                                        ))}
+                                    </Dropdown.Menu>
+                                </Dropdown>
 
                                 {/* ======================= PAID ======================= */}
                                 {paymentType === "Paid" && (
@@ -413,7 +553,7 @@ function AddStudentModal({ show, onHide }) {
                                             <option>Outgoing</option>
                                         </Form.Select>
 
-                                        {/* ⭐ STAR RATING */}
+                                       
 
                                     </>
                                 )}
@@ -431,10 +571,13 @@ function AddStudentModal({ show, onHide }) {
                 <Button variant="secondary" className={styles.footerBtn} onClick={onHide}>
                     Cancel
                 </Button>
-                <Button className={`${styles.footerBtn} ${styles.saveBtn}`}>Save</Button>
+                <Button className={`${styles.footerBtn} ${styles.saveBtn}`} onClick={handleSaveStudent}
+                >Save</Button>
             </Modal.Footer>
         </Modal>
     );
 }
 
 export default AddStudentModal;
+
+
