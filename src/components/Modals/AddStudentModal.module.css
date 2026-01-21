@@ -26,7 +26,8 @@
   font-size: 14px;
   width: 100%;
   max-width: 100%;
-  box-sizing: border-box; /* ⭐ key fix */
+  box-sizing: border-box;
+  /* ⭐ key fix */
 }
 
 /* Textarea Specific */
@@ -38,10 +39,14 @@
 /* Footer Buttons */
 .footerBtn {
   min-width: 110px;
-  height: 38px;              /* tablet height */
-  border-radius: 999px !important;;      /* ⭐ pill / tablet shape */
+  height: 38px;
+  /* tablet height */
+  border-radius: 999px !important;
+  ;
+  /* ⭐ pill / tablet shape */
   font-weight: 500;
-  padding: 0 22px !important;      /* horizontal padding */
+  padding: 0 22px !important;
+  /* horizontal padding */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -79,6 +84,7 @@
   border: none;
   margin-bottom: 8px;
 }
+
 .datePicker {
   width: 100%;
 }
@@ -88,6 +94,31 @@
 .datePicker input {
   width: 100%;
 }
+
+.convertBox {
+  background: #f0fff4;
+  border: 1px solid #a3e4b2;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.callLogItem {
+  background: #f9f9ff;
+  border-left: 4px solid #4e54c8;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.warning {
+  color: #dc3545;
+  font-size: 0.75rem;
+  margin-bottom: 6px;
+  margin-left: 2px;
+  font-weight: 500;
+}
+
+
 @media (max-width: 576px) {
   .modal-dialog {
     max-width: 95%;
