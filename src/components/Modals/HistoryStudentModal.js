@@ -2,85 +2,90 @@ import React from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
-import styles from "./AddStudentModal.module.css";
+import historyStyles from "./HistoryStudentModal.module.css";
+import { Form, Row, Col, Card } from "react-bootstrap";
+import { useState } from "react";
+import axios from "axios";
+import { BASEURL } from "../../service/baseUrl";
 
-function HistoryStudentModal({ show, onHide, student }) {
-  // student.callHistory = array of calls
-  // Example: [{ date: "2026-01-10", time: "12:00 PM", handler: "Anitha", type: "Incoming" }]
+function HistoryStudentModal({ show, onHide }) {
+  const [date, setDate] = useState("");
+  const [data, setData] = useState(null);
 
-  // Date-wise summary
-  const summary = {};
-  student?.callHistory?.forEach((call) => {
-    if (!summary[call.date]) summary[call.date] = { records: 0, amount: 0, callbacks: 0 };
-    summary[call.date].records += 1;
-    summary[call.date].amount += call.amountPaid || 0;
-    if (!call.callbackMade) summary[call.date].callbacks += 1;
-  });
+  const fetchHistory = async () => {
+    const res = await axios.get(`${BASEURL}/date-summary?date=${date}`);
+    setData(res.data);
+  };
+
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title className={styles.title}>📜 {student?.name} History</Modal.Title>
+        <Modal.Title className={historyStyles.title}>📅 Date-wise History</Modal.Title>
+
       </Modal.Header>
 
       <Modal.Body>
-        {student?.callHistory?.length > 0 ? (
+        <Form.Control
+          type="date"
+          className={`mb-3 ${historyStyles.dateInput}`}
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+
+        <Button onClick={fetchHistory} className={`mb-3 ${historyStyles.searchBtn}`}>
+          Search
+        </Button>
+
+        {data && (
           <>
-            <h6>Call Records</h6>
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Handler</th>
-                  <th>Type</th>
-                  <th>Amount Paid</th>
-                  <th>Callback Made</th>
-                </tr>
-              </thead>
+            {/* Summary Cards */}
+            <Row className="mb-3">
+              <Col>
+                <Card body className={historyStyles.summaryCard}>
+                  Total Contacts
+                  <div className={historyStyles.summaryValue}>{data.totalContacts}</div>
+                </Card>
+              </Col>
+              <Col>
+                <Card body className={historyStyles.summaryCard}>Total Amount: <div className={historyStyles.summaryValue}>₹{data.totalAmountReceived}</div></Card>
+              </Col>
+              <Col>
+                <Card body className={historyStyles.summaryCard}>Callbacks: <div className={historyStyles.summaryValue} >{data.totalCallbacks}</div></Card>
+              </Col>
+            </Row>
+
+            {/* Class-wise */}
+            <h6 className={historyStyles.sectionTitle}>Class-wise Count</h6>
+            <Table bordered className={historyStyles.table}>
               <tbody>
-                {student.callHistory.map((call, idx) => (
-                  <tr key={idx}>
-                    <td>{call.date}</td>
-                    <td>{call.time}</td>
-                    <td>{call.handler}</td>
-                    <td>{call.type}</td>
-                    <td>{call.amountPaid || "-"}</td>
-                    <td>{call.callbackMade ? "Yes" : "No"}</td>
+                {data.classWise.map((c, i) => (
+                  <tr key={i}>
+                    <td>{c._id || "Unknown"}</td>
+                    <td>{c.count}</td>
                   </tr>
                 ))}
               </tbody>
             </Table>
 
-            <h6>Date-wise Summary</h6>
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Records Added</th>
-                  <th>Total Amount Received</th>
-                  <th>No Callbacks Scheduled</th>
-                </tr>
-              </thead>
+            {/* Syllabus-wise */}
+            <h6>Syllabus-wise Count</h6>
+            <Table bordered>
               <tbody>
-                {Object.entries(summary).map(([date, val], idx) => (
-                  <tr key={idx}>
-                    <td>{date}</td>
-                    <td>{val.records}</td>
-                    <td>{val.amount}</td>
-                    <td>{val.callbacks}</td>
+                {data.syllabusWise.map((s, i) => (
+                  <tr key={i}>
+                    <td>{s._id || "Unknown"}</td>
+                    <td>{s.count}</td>
                   </tr>
                 ))}
               </tbody>
             </Table>
           </>
-        ) : (
-          <p>No call history found.</p>
         )}
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" className={styles.footerBtn} onClick={onHide}>
+        <Button variant="secondary" onClick={onHide}>
           Close
         </Button>
       </Modal.Footer>

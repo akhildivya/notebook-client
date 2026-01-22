@@ -1,0 +1,116 @@
+.title {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #4e54c8; /* soft blue-purple */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Form Input */
+.formControl {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.formControl:focus {
+  border-color: #4e54c8;
+  box-shadow: 0 0 5px rgba(78, 84, 200, 0.4);
+  outline: none;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  font-size: 0.95rem;
+}
+
+table th,
+table td {
+  text-align: center;
+  padding: 10px;
+  vertical-align: middle;
+}
+
+table thead {
+  background-color: #4e54c8;
+  color: #fff;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #f7f7f7;
+}
+
+table tbody tr:hover {
+  background-color: rgba(78, 84, 200, 0.1);
+}
+
+/* Table empty state */
+.text-center {
+  font-style: italic;
+  color: #777;
+}
+
+/* Modal Footer Buttons */
+.footerBtn {
+  border-radius: 8px;
+  padding: 6px 18px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.footerBtn:hover {
+  opacity: 0.9;
+}
+
+.viewMoreBtn {
+  font-size: 0.8rem;
+  padding: 0;
+  color: #4e54c8;
+  text-decoration: none;
+}
+
+.viewMoreBtn:hover {
+  text-decoration: underline;
+}
+
+.expandedRow {
+  background-color: #fafaff;
+}
+
+.detailsList {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.detailsList > li {
+  margin-bottom: 10px;
+}
+
+.detailsList ul {
+  list-style-type: circle;
+  padding-left: 20px;
+}.actionCol {
+  min-width: 120px;
+}
+
+.actionBtn {
+  display: block;
+  width: 100%;
+  margin-bottom: 6px;
+  text-align: left;
+  padding: 2px 4px;
+}
+
+.viewMoreBtn {
+  font-weight: 500;
+  padding: 0;
+}
+

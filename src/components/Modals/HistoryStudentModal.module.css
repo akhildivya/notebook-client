@@ -1,0 +1,86 @@
+/* Modal Title */
+.title {
+  font-weight: 600;
+  color: #4e54c8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Date input */
+.dateInput {
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  font-size: 0.95rem;
+}
+
+/* Search button */
+.searchBtn {
+  background: linear-gradient(135deg, #4e54c8, #8f94fb);
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.searchBtn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* Summary cards */
+.summaryCard {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.summaryValue {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4e54c8;
+}
+
+/* Section headings */
+.sectionTitle {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Tables */
+.table {
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table th {
+  background-color: #f4f6ff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.table td {
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+/* Footer button */
+.footerBtn {
+  border-radius: 8px;
+  padding: 6px 16px;
+}
+
+/* Empty state */
+.emptyText {
+  text-align: center;
+  color: #777;
+  margin-top: 20px;
+}

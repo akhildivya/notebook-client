@@ -77,3 +77,10 @@
     font-size: 13px;
   }
 }
+.viewAllBtn {
+  background: #16a085; /* teal */
+}
+
+.viewAllBtn:hover {
+  background: #12806a; /* darker teal */
+}
