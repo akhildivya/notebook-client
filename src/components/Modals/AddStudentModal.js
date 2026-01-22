@@ -34,6 +34,34 @@ function AddStudentModal({ show, onHide }) {
     const syllabusOptions = ["CBSE", "ICSE", "HSE", "KTU"];
     const relationOptions = ["Father", "Mother", "Guardian", "Other"];
     const paymentOptions = ["Paid", "Agreed"];
+    const resetForm = () => {
+        setStudentName("");
+        setFatherName("");
+        setMotherName("");
+        setInstitution("");
+        setDistrict("");
+        setClassLevel("");
+        setSyllabus("");
+        setRemarks("");
+
+        setContacts([{ phone: "", relation: " " }]);
+
+        setPaymentType("");
+        setTotalAmount("");
+        setPaidAmount("");
+        setAgreedAmount("");
+        setPaidDateTime(null);
+        setPaymentMethod("UPI");
+        setPaymentStatus("Pending");
+
+        setCallbackArranged("No");
+        setCallbackDateTime(null);
+        setCallbackHandler("");
+        setCallbackCaller("");
+        setCallbackCallType("");
+
+        setErrors({});
+    };
 
     const [paymentType, setPaymentType] = useState(""); // "Paid" or "Agreed"
 
@@ -50,7 +78,7 @@ function AddStudentModal({ show, onHide }) {
     const [totalAmount, setTotalAmount] = useState("");
     const [callbackHandler, setCallbackHandler] = useState("");
     const [callbackCaller, setCallbackCaller] = useState("");
-    const [callbackCallType, setCallbackCallType] = useState("Outgoing");
+    const [callbackCallType, setCallbackCallType] = useState("");
     const [callbackArranged, setCallbackArranged] = useState("No"); // "Yes" | "No"
     const [studentName, setStudentName] = useState("");
     const [fatherName, setFatherName] = useState("");
@@ -60,8 +88,10 @@ function AddStudentModal({ show, onHide }) {
     const [classLevel, setClassLevel] = useState("");
     const [syllabus, setSyllabus] = useState("");
     const [remarks, setRemarks] = useState("");
+
     const textRegex = /^[A-Za-z.,\-\s]*$/;
     const numberRegex = /^[0-9]*$/;
+    const phoneRegex = /^[0-9]{0,15}$/;
 
     const [errors, setErrors] = useState({});
 
@@ -96,12 +126,33 @@ function AddStudentModal({ show, onHide }) {
 
     const handleContactChange = (index, field, value) => {
         const updated = [...contacts];
-        updated[index][field] = value;
+        if (field === "phone") {
+            // allow only digits and max 10 length
+            if (!phoneRegex.test(value)) return;
+
+            updated[index].phone = value;
+
+            // validation error
+            if (value.length !== 10 && value.length !== 0) {
+                setErrors((prev) => ({
+                    ...prev,
+                    [`phone_${index}`]: "Phone number must be exactly 10 digits"
+                }));
+            } else {
+                setErrors((prev) => ({
+                    ...prev,
+                    [`phone_${index}`]: ""
+                }));
+            }
+        } else {
+            updated[index][field] = value;
+        }
+
         setContacts(updated);
     };
 
     const addContact = () => {
-        setContacts([...contacts, { phone: "", relation: "Father" }]);
+        setContacts([...contacts, { phone: "", relation: "Father", error: "" }]);
     };
 
     const removeContact = (index) => {
@@ -156,6 +207,7 @@ function AddStudentModal({ show, onHide }) {
 
             await axios.post(`${BASEURL}/create-student`, payload);
             toast.success("Student added successfully ✅", { position: 'top-center' });
+            resetForm();
             onHide();
         } catch (err) {
 
@@ -198,8 +250,12 @@ function AddStudentModal({ show, onHide }) {
                                             onChange={(e) =>
                                                 handleContactChange(index, "phone", e.target.value)
                                             }
+                                            maxLength={15}
                                             className={styles.formControl}
                                         />
+                                        {contact.error && (
+                                            <div className={styles.warning}>{contact.error}</div>
+                                        )}
 
                                         <Dropdown className="w-100">
                                             <Dropdown.Toggle
@@ -330,11 +386,11 @@ function AddStudentModal({ show, onHide }) {
                                         variant="outline-secondary"
                                         className={`${styles.formControl} w-100 text-start`}
                                     >
-                                        {paymentType || "----"}
+                                        {paymentType || "Select Payment Mode"}
                                     </Dropdown.Toggle>
 
                                     <Dropdown.Menu className="w-100">
-                                        
+
                                         {paymentOptions.map((type) => (
                                             <Dropdown.Item
                                                 key={type}
@@ -528,7 +584,7 @@ function AddStudentModal({ show, onHide }) {
 
                                         {/* HANDLER */}
                                         <Form.Control
-                                            placeholder="Handler Name"
+                                            placeholder="Call Initiator"
                                             className={`mb-2 ${styles.formControl}`}
                                             value={callbackHandler}
                                             onChange={handleTextChange("callbackHandler", setCallbackHandler)}
@@ -537,23 +593,40 @@ function AddStudentModal({ show, onHide }) {
 
                                         {/* CALLER */}
                                         <Form.Control
-                                            placeholder="Caller Name"
+                                            placeholder="Call Receiver"
                                             className={`mb-2 ${styles.formControl}`}
                                             value={callbackCaller}
                                             onChange={handleTextChange("callbackCaller", setCallbackCaller)}
                                         />
                                         {errors.callbackCaller && <div className={styles.warning}>{errors.callbackCaller}</div>}
                                         {/* CALL TYPE */}
-                                        <Form.Select
-                                            className={`mb-3 ${styles.formControl}`}
-                                            value={callbackCallType}
-                                            onChange={(e) => setCallbackCallType(e.target.value)}
-                                        >
-                                            <option>Incoming</option>
-                                            <option>Outgoing</option>
-                                        </Form.Select>
+                                        <Dropdown className="mb-3 w-100">
+                                            <Dropdown.Toggle
+                                                variant="outline-secondary"
+                                                className={`${styles.formControl} w-100 text-start`}
+                                            >
+                                                {callbackCallType || "Select Call Type"}
+                                            </Dropdown.Toggle>
 
-                                       
+                                            <Dropdown.Menu className="w-100">
+                                                <Dropdown.Item
+                                                    active={callbackCallType === "Incoming"}
+                                                    onClick={() => setCallbackCallType("Incoming")}
+                                                >
+                                                    Incoming
+                                                </Dropdown.Item>
+
+                                                <Dropdown.Item
+                                                    active={callbackCallType === "Outgoing"}
+                                                    onClick={() => setCallbackCallType("Outgoing")}
+                                                >
+                                                    Outgoing
+                                                </Dropdown.Item>
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+
+
+
 
                                     </>
                                 )}
