@@ -32,7 +32,7 @@ function AddStudentModal({ show, onHide }) {
 
     const classLevels = ["Plus One", "Plus Two", "BTech"];
     const syllabusOptions = ["CBSE", "ICSE", "HSE", "KTU"];
-    const relationOptions = ["Father", "Mother", "Guardian", "Other"];
+    const relationOptions = ["Father", "Mother", "Guardian", "Other", "Self"];
     const paymentOptions = ["Paid", "Agreed"];
     const resetForm = () => {
         setStudentName("");
@@ -44,14 +44,14 @@ function AddStudentModal({ show, onHide }) {
         setSyllabus("");
         setRemarks("");
 
-        setContacts([{ phone: "", relation: " " }]);
+        setContacts([{ phone: "", relation: "----- " }]);
 
         setPaymentType("");
         setTotalAmount("");
         setPaidAmount("");
         setAgreedAmount("");
         setPaidDateTime(null);
-        setPaymentMethod("UPI");
+        setPaymentMethod(" ");
         setPaymentStatus("Pending");
 
         setCallbackArranged("No");
@@ -67,13 +67,14 @@ function AddStudentModal({ show, onHide }) {
 
     const [paidDateTime, setPaidDateTime] = useState(null);
     const [contacts, setContacts] = useState([
-        { phone: "", relation: "Father" }
+        { phone: "", relation: "" }
     ]);
     const [callbackDateTime, setCallbackDateTime] = useState(null);
 
     const [paymentStatus, setPaymentStatus] = useState("Pending");
-    const [paymentMethod, setPaymentMethod] = useState("UPI");
+    const [paymentMethod, setPaymentMethod] = useState("");
     const [agreedAmount, setAgreedAmount] = useState("");
+    const [agreedDateTime, setAgreedDateTime] = useState(null)
     const [paidAmount, setPaidAmount] = useState("");
     const [totalAmount, setTotalAmount] = useState("");
     const [callbackHandler, setCallbackHandler] = useState("");
@@ -166,30 +167,35 @@ function AddStudentModal({ show, onHide }) {
             const cleanedContacts = contacts.filter(
                 c => c.phone && c.phone.trim() !== ""
             );
-
             const payload = {
                 studentName,
                 fatherName,
                 motherName,
                 contacts: cleanedContacts,
-
                 institution,
                 district,
                 classLevel,
                 syllabus,
                 remarks,
 
-                payment: paymentType
-                    ? {
-                        type: paymentType,
-                        totalAmount: paymentType === "Paid" ? totalAmount : undefined,
-                        paidAmount: paymentType === "Paid" ? paidAmount : undefined,
-                        agreedAmount: paymentType === "Agreed" ? agreedAmount : undefined,
-                        dateTime: paidDateTime,
-                        method: paymentMethod,
-                        status: paymentStatus
-                    }
-                    : undefined,
+                payment: {
+                    totalAmount: totalAmount || undefined,
+                    type: paymentType,
+                    agreedAmount: paymentType === "Agreed" ? agreedAmount : undefined,
+                    agreedDateTime: paymentType === "Agreed" ? agreedDateTime : undefined,
+
+                    transactions: paymentType === "Paid"
+                        ? [
+                            {
+                                amount: Number(paidAmount),
+                                dateTime: paidDateTime,
+                                method: paymentMethod || undefined
+                            }
+                        ]
+                        : [],
+
+                    status: paymentStatus // 'Pending' by default
+                },
 
                 callback:
                     callbackArranged === "Yes"
@@ -200,10 +206,10 @@ function AddStudentModal({ show, onHide }) {
                             caller: callbackCaller,
                             callType: callbackCallType
                         }
-                        : {
-                            arranged: "No"
-                        }
+                        : { arranged: "No" }
             };
+
+
 
             await axios.post(`${BASEURL}/create-student`, payload);
             toast.success("Student added successfully ✅", { position: 'top-center' });
@@ -454,16 +460,27 @@ function AddStudentModal({ show, onHide }) {
                                             />
                                         </div>
 
-                                        <Form.Select
-                                            className={`mb-2 ${styles.formControl}`}
-                                            value={paymentMethod}
-                                            onChange={(e) => setPaymentMethod(e.target.value)}
-                                        >
-                                            <option value="">---Select---</option>
-                                            <option>UPI</option>
-                                            <option>Cash</option>
-                                            <option>Bank Transfer</option>
-                                        </Form.Select>
+                                        <Dropdown className="mb-2 w-100">
+                                            <Dropdown.Toggle
+                                                variant="outline-secondary"
+                                                className={`${styles.formControl} w-100 text-start`}
+                                            >
+                                                {paymentMethod || "Select Method"}
+                                            </Dropdown.Toggle>
+
+                                            <Dropdown.Menu className="w-100">
+                                                {["UPI", "Cash", "Bank Transfer"].map((method) => (
+                                                    <Dropdown.Item
+                                                        key={method}
+                                                        active={paymentMethod === method}
+                                                        onClick={() => setPaymentMethod(method)}
+                                                    >
+                                                        {method}
+                                                    </Dropdown.Item>
+                                                ))}
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+
 
                                         {/* STATUS RADIO */}
                                         <Form.Label className="fw-semibold mt-2">Payment Status</Form.Label>
