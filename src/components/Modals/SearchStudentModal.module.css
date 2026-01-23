@@ -84,15 +84,14 @@ table tbody tr:hover {
   background-color: #fafaff;
 }
 
-.detailsList {
-  list-style-type: disc;
-  padding-left: 20px;
-  margin: 0;
+.detailBlock {
+  margin-bottom: 12px;
 }
 
-.detailsList > li {
-  margin-bottom: 10px;
+.detailBlock p {
+  margin: 2px 0;
 }
+
 
 .detailsList ul {
   list-style-type: circle;

@@ -1,8 +1,14 @@
 import React from 'react'
 import { FaPlus, FaSearch, FaHistory, FaList } from "react-icons/fa";
 import styles from "./ActionButtons.module.css";
+import { useNavigate } from "react-router-dom";
 
-function ActionButtons({ onAdd, onSearch, onHistory, onViewAll }) {
+function ActionButtons({ onAdd, onSearch, onHistory }) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    navigate("/view-all");
+  };
   return (
     <>
       <div className={styles.container}>
@@ -16,7 +22,7 @@ function ActionButtons({ onAdd, onSearch, onHistory, onViewAll }) {
           <span>Search</span>
         </button>
 
-        <button className={`${styles.btn} ${styles.viewAllBtn}`} onClick={onViewAll}>
+        <button className={`${styles.btn} ${styles.viewAllBtn}`} onClick={handleViewAll}>
           <FaList />
           <span>View All</span>
         </button>

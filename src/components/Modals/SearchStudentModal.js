@@ -66,7 +66,7 @@ function SearchStudentModal({ show, onHide }) {
       <Modal.Body>
         <Form>
           <Form.Control
-            placeholder="Enter Student Name"
+            placeholder="Find by anything"
             className={`mb-3 ${searchStyles.formControl}`}
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
@@ -85,6 +85,7 @@ function SearchStudentModal({ show, onHide }) {
               <th>District</th>
               <th>Payment Type</th>
               <th>Payment Status</th>
+              <th>Created On</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -104,6 +105,18 @@ function SearchStudentModal({ show, onHide }) {
                     <td>{s.district}</td>
                     <td>{s.payment?.type || "-"}</td>
                     <td>{s.payment?.status || "-"}</td>
+                    <td>
+                      {s.createdAt
+                        ? new Date(s.createdAt).toLocaleString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })
+                        : "-"}
+                    </td>
 
                     {/* ACTION COLUMN */}
                     <td className={searchStyles.actionCol}>
@@ -139,77 +152,72 @@ function SearchStudentModal({ show, onHide }) {
                   {/* EXPANDED ROW */}
                   {expandedRow === s._id && (
                     <tr className={searchStyles.expandedRow}>
-                      <td colSpan="10">
-                        <ul className={searchStyles.detailsList}>
+                      <td colSpan="11">
+                        <div className={searchStyles.detailsList}>
+
                           {/* Phone Numbers */}
-                          <li>
+                          <div className={searchStyles.detailBlock}>
                             <strong>📞 Phone Numbers:</strong>
-                            <ul>
-                              {s.contacts?.length > 0 ? (
-                                s.contacts.map((c, i) => (
-                                  <li key={i}>
-                                    {c.relation}: {c.phone}
-                                  </li>
-                                ))
-                              ) : (
-                                <li>No contact details</li>
-                              )}
-                            </ul>
-                          </li>
+                            {s.contacts?.length > 0 ? (
+                              s.contacts.map((c, i) => (
+                                <p key={i}>
+                                  {c.relation}: {c.phone}
+                                </p>
+                              ))
+                            ) : (
+                              <p>No contact details</p>
+                            )}
+                          </div>
 
                           {/* Callback Details */}
-                          <li>
+                          <div className={searchStyles.detailBlock}>
                             <strong>☎️ Callback Details:</strong>
-                            <ul>
-                              {s.callback?.arranged === "Yes" ? (
-                                <>
-                                  <li>
-                                    Date & Time:{" "}
-                                    {s.callback.dateTime
-                                      ? new Date(s.callback.dateTime).toLocaleString()
-                                      : "-"}
-                                  </li>
-                                  <li>Handler: {s.callback.handler || "-"}</li>
-                                  <li>Caller: {s.callback.caller || "-"}</li>
-                                  <li>Type: {s.callback.callType || "-"}</li>
-                                </>
-                              ) : (
-                                <li>No callback arranged</li>
-                              )}
-                            </ul>
-                          </li>
+                            {s.callback?.arranged === "Yes" ? (
+                              <>
+                                <p>
+                                  Date & Time:{" "}
+                                  {s.callback.dateTime
+                                    ? new Date(s.callback.dateTime).toLocaleString()
+                                    : "-"}
+                                </p>
+                                <p>Handler: {s.callback.handler || "-"}</p>
+                                <p>Caller: {s.callback.caller || "-"}</p>
+                                <p>Type: {s.callback.callType || "-"}</p>
+                              </>
+                            ) : (
+                              <p>No callback arranged</p>
+                            )}
+                          </div>
 
                           {/* Payment History */}
-                          <li>
+                          <div className={searchStyles.detailBlock}>
                             <strong>💰 Payment History:</strong>
-                            <ul>
-                              {s.payment?.transactions?.length > 0 ? (
-                                s.payment.transactions.map((t, i) => (
-                                  <li key={i}>
-                                    ₹{t.amount} via {t.method} on{" "}
-                                    {new Date(t.dateTime).toLocaleString()}
-                                  </li>
-                                ))
-                              ) : (
-                                <li>No payment transactions</li>
-                              )}
-                            </ul>
-                          </li>
+                            {s.payment?.transactions?.length > 0 ? (
+                              s.payment.transactions.map((t, i) => (
+                                <p key={i}>
+                                  ₹{t.amount} via {t.method} on{" "}
+                                  {new Date(t.dateTime).toLocaleString()}
+                                </p>
+                              ))
+                            ) : (
+                              <p>No payment transactions</p>
+                            )}
+                          </div>
 
                           {/* Payment Summary */}
-                          <li>
+                          <div className={searchStyles.detailBlock}>
                             <strong>💳 Payment Summary:</strong>
-                            <ul>
-                              <li>Total Amount: ₹{s.payment?.totalAmount || "-"}</li>
-                              <li>Agreed Amount: ₹{s.payment?.agreedAmount || "-"}</li>
-                              <li>Status: {s.payment?.status || "-"}</li>
-                              <li>Type: {s.payment?.type || "-"}</li>
-                            </ul>
-                          </li>
-                        </ul>
+                            <p>Total Amount: ₹{s.payment?.totalAmount || "-"}</p>
+                            <p>Agreed Amount: ₹{s.payment?.agreedAmount || "-"}</p>
+                            <p>Status: {s.payment?.status || "-"}</p>
+                            <p>Type: {s.payment?.type || "-"}</p>
+                          </div>
+
+                        </div>
                       </td>
                     </tr>
                   )}
+
                 </React.Fragment>
               ))
             ) : (
