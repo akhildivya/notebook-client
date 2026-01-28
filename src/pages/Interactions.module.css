@@ -1,0 +1,25 @@
+.container {
+  background-color: #ffffff;
+  border-radius: 8px;
+}
+
+.heading {
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  white-space: nowrap;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.pagination button {
+  min-width: 36px;
+}
