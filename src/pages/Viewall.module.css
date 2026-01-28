@@ -156,3 +156,21 @@ th {
 th:hover .sortIcon {
   color: #0d6efd;
 }
+/* Viewall.module.css */
+.callbackBell {
+    color: #f39c12; /* gold */
+    font-weight: bold;
+}
+
+.callbackOver {
+    color: #e74c3c; /* red */
+    font-weight: bold;
+}
+
+.callbackYes {
+    color: #27ae60; /* green */
+}
+
+.callbackNo {
+    color: #7f8c8d; /* gray */
+}

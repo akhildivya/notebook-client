@@ -1,15 +1,15 @@
 .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  margin-top: 90px;
+  position: relative;
+  width: 320px;
+  height: 320px;
+  margin: 80px auto;
 }
 
+/* ================= COMMON BUTTON ================= */
 .btn {
-  width: 120px;
-  height: 120px;
+  position: absolute;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   border: none;
   color: white;
@@ -19,68 +19,125 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  background: transparent;
+  overflow: hidden;
+
+  /* smooth hover only for outer buttons */
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease,
+    background-color 0.3s ease;
 }
 
-/* Common hover animation */
-.btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-}
-
+/* text */
 .btn span {
   font-size: 14px;
   margin-top: 6px;
+  position: relative;
+  z-index: 2;
 }
 
-/* Button color variants */
+/* icon */
+.btn svg {
+  position: relative;
+  z-index: 2;
+}
+
+/* ================= OUTER BUTTON HOVER ONLY ================= */
+.btn:not(.interactionsBtn):hover {
+  transform: scale(1.06);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ================= CIRCULAR POSITIONS ================= */
 .addBtn {
-  background: #4e54c8; /* blue */
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4e54c8;
 }
 
 .searchBtn {
-  background: #27ae60; /* green */
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #27ae60;
+}
+
+.viewAllBtn {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #16a085;
 }
 
 .historyBtn {
-  background: #e67e22; /* orange */
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #e67e22;
 }
 
-/* ✨ Individual hover colors */
+/* ================= CENTER INTERACTIONS (STATIC) ================= */
+.interactionsBtn {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2c3e50;
+  z-index: 2;
+
+  cursor: default;
+
+  /* ❌ disable all animations */
+  transition: none;
+}
+
+/* ❌ no hover effect at all */
+.interactionsBtn:hover {
+  transform: translate(-50%, -50%);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+/* ================= OPTIONAL ROTATING RING (REMOVE IF NOT NEEDED) ================= */
+/* If you do NOT want ANY rotation, you can safely delete this entire block */
+.rotateRing {
+  display: none;
+}
+
+/* ================= HOVER COLOR VARIANTS ================= */
 .addBtn:hover {
-  background: #3b40a4; /* darker blue */
+  background: #3b40a4;
 }
 
 .searchBtn:hover {
-  background: #1e8f4d; /* darker green */
+  background: #1e8f4d;
+}
+
+.viewAllBtn:hover {
+  background: #12806a;
 }
 
 .historyBtn:hover {
-  background: #cf711f; /* darker orange */
+  background: #cf711f;
 }
 
-/* 📱 Responsive */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
   .container {
-    margin-top: 40px;
-    gap: 20px;
+    width: 260px;
+    height: 260px;
+    margin-top: 50px;
   }
 
   .btn {
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     font-size: 20px;
   }
 
   .btn span {
     font-size: 13px;
   }
-}
-.viewAllBtn {
-  background: #16a085; /* teal */
-}
-
-.viewAllBtn:hover {
-  background: #12806a; /* darker teal */
 }

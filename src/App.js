@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Routes, Route } from "react-router-dom";
 import Viewall from "./pages/Viewall";
+import Interactions from "./pages/Interactions";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
        <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/view-all" element={<Viewall />} />
+        <Route path="/interactions" element={<Interactions />} />
       </Routes>
     </>
   );
