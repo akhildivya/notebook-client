@@ -3,11 +3,6 @@ import { BASEURL } from "../service/baseUrl";
 import axios from "axios";
 import { Button, Form, Table } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-
-import AddCallLogModal from "../components/Modals/AddCallLogModal";
-import AddPaymentModal from "../components/Modals/AddPaymentModal";
-import PaymentStatusBadge from "../components/Modals/PaymentStatusBadge";
-
 import interactionStyles from "./Interactions.module.css";
 
 function Interactions() {
@@ -78,147 +73,156 @@ function Interactions() {
   };
 
   return (
-    <div className={`p-3 ${interactionStyles.container}`}>
-      {/* 🔙 Back */}
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className={interactionStyles.heading}>Student Interactions</h4>
-        <Button variant="outline-secondary" onClick={() => navigate("/")}>
-          ⬅ Back to Home
-        </Button>
-      </div>
-
-      {/* 🔍 Search */}
-      <div className="d-flex gap-2 mb-3">
-        <Form.Control
-          placeholder="Search student"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <Button onClick={fetchStudents}>Search</Button>
-      </div>
-
-      {/* 📋 Table */}
-      <Table bordered hover responsive className={interactionStyles.table}>
-        <thead>
-          <tr>
-            <th onClick={() => handleSort("studentName")}>
-              Name{renderSortArrow("studentName")}
-            </th>
-            <th onClick={() => handleSort("fatherName")}>
-              Father{renderSortArrow("fatherName")}
-            </th>
-            <th onClick={() => handleSort("motherName")}>
-              Mother{renderSortArrow("motherName")}
-            </th>
-            <th onClick={() => handleSort("classLevel")}>
-              Class{renderSortArrow("classLevel")}
-            </th>
-            <th onClick={() => handleSort("syllabus")}>
-              Syllabus{renderSortArrow("syllabus")}
-            </th>
-            <th onClick={() => handleSort("institution")}>
-              School{renderSortArrow("institution")}
-            </th>
-            <th onClick={() => handleSort("district")}>
-              District{renderSortArrow("district")}
-            </th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {paginatedStudents.length > 0 ? (
-            paginatedStudents.map((s) => (
-              <tr key={s._id}>
-                {/* 👨‍🎓 Student */}
-                <td>
-                  <strong>{s.studentName}</strong>
-                  {getPhone(s.contacts, "Self") && (
-                    <div className="text-muted small">
-                      📞 {getPhone(s.contacts, "Self")}
-                    </div>
-                  )}
-                </td>
-
-                {/* 👨 Father */}
-                <td>
-                  {s.fatherName}
-                  {getPhone(s.contacts, "Father") && (
-                    <div className="text-muted small">
-                      📞 {getPhone(s.contacts, "Father")}
-                    </div>
-                  )}
-                </td>
-
-                {/* 👩 Mother */}
-                <td>
-                  {s.motherName}
-                  {getPhone(s.contacts, "Mother") && (
-                    <div className="text-muted small">
-                      📞 {getPhone(s.contacts, "Mother")}
-                    </div>
-                  )}
-                </td>
-
-                <td>{s.classLevel}</td>
-                <td>{s.syllabus}</td>
-                <td>{s.institution}</td>
-                <td>{s.district}</td>
-
-                <td>
-                  <PaymentStatusBadge payment={s.payment} />
-                </td>
-
-                <td className="d-flex gap-2">
-                  <AddPaymentModal student={s} />
-                  <AddCallLogModal studentId={s._id} />
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="9" className="text-center">
-                No students found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
-
-      {/* 🔢 Pagination */}
-      {totalPages > 1 && (
-        <div className={interactionStyles.pagination}>
-          <Button
-            size="sm"
-            variant="outline-secondary"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
-            Prev
-          </Button>
-
-          {[...Array(totalPages)].map((_, i) => (
-            <Button
-              key={i}
-              size="sm"
-              variant={currentPage === i + 1 ? "primary" : "outline-primary"}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
+    <div className={interactionStyles.page}>
+      <div className={`w-75 mx-auto ${interactionStyles.pageContainer}`}>
+        <div className={`p-3 ${interactionStyles.container}`}>
+          {/* 🔙 Back */}
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h4 className={interactionStyles.heading}>Student Interactions</h4>
+            <Button variant="outline-secondary" onClick={() => navigate("/")}>
+              ⬅ Back to Home
             </Button>
-          ))}
+          </div>
 
-          <Button
-            size="sm"
-            variant="outline-secondary"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          >
-            Next
-          </Button>
+          {/* 🔍 Search */}
+          <div className="d-flex gap-2 mb-3">
+            <Form.Control
+              placeholder="Search student"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <Button onClick={fetchStudents}>Search</Button>
+          </div>
+
+          {/* 📋 Table */}
+          <Table bordered hover responsive className={interactionStyles.table}>
+            <thead>
+              <tr>
+                <th onClick={() => handleSort("studentName")}>
+                  Student{renderSortArrow("studentName")}
+                </th>
+                <th>Parents</th>
+                <th>Course</th>
+                <th>School</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {paginatedStudents.length > 0 ? (
+                paginatedStudents.map((s) => (
+                  <tr key={s._id}>
+                    {/* STUDENT */}
+                    <td>
+                      <strong>{s.studentName}</strong>
+                      {getPhone(s.contacts, "Self") && (
+                        <div className="text-muted small">
+                          📞 {getPhone(s.contacts, "Self")}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* PARENTS */}
+                    <td>
+                      <div>
+                        <strong>Father:</strong> {s.fatherName || "-"}
+                        {getPhone(s.contacts, "Father") && (
+                          <div className="text-muted small">
+                            📞 {getPhone(s.contacts, "Father")}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-1">
+                        <strong>Mother:</strong> {s.motherName || "-"}
+                        {getPhone(s.contacts, "Mother") && (
+                          <div className="text-muted small">
+                            📞 {getPhone(s.contacts, "Mother")}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* COURSE */}
+                    <td>
+                      <div>
+                        <strong>{s.classLevel}</strong>
+                      </div>
+                      <div className="text-muted small">
+                        {s.syllabus || "-"}
+                      </div>
+                    </td>
+
+                    {/* SCHOOL */}
+                    <td>
+                      <div>
+                        <strong>{s.institution}</strong>
+                      </div>
+                      <div className="text-muted small">
+                        {s.district}
+                      </div>
+                    </td>
+
+                    {/* ACTIONS */}
+                    <td>
+                      <div className={interactionStyles.actionButtons}>
+                        <Button size="sm" variant="outline-success">
+                          💳 Payments
+                        </Button>
+                        <Button size="sm" variant="outline-primary">
+                          📞 Calls
+                        </Button>
+
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center">
+                    No students found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+
+          </Table>
+
+          {/* 🔢 Pagination */}
+          {totalPages > 1 && (
+            <div className={interactionStyles.pagination}>
+              <Button
+                size="sm"
+                variant="outline-secondary"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Prev
+              </Button>
+
+              {[...Array(totalPages)].map((_, i) => (
+                <Button
+                  key={i}
+                  size="sm"
+                  variant={currentPage === i + 1 ? "primary" : "outline-primary"}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+
+              <Button
+                size="sm"
+                variant="outline-secondary"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

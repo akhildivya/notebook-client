@@ -6,15 +6,15 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Form } from "react-bootstrap";
 import viewAllcss from "./Viewall.module.css";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import AddPaymentModal from "../components/Modals/AddPaymentModal";
 import axios from "axios";
 import { BASEURL } from "../service/baseUrl";
 import PaymentStatusBadge from "../components/Modals/PaymentStatusBadge";
-
+import AddCallLogModal from "../components/Modals/AddCallLogModal";
 function Viewall() {
     const navigate = useNavigate();
-    const ITEMS_PER_PAGE = 10;
+    const ITEMS_PER_PAGE = 5;
     const [students, setStudents] = useState([]);
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -95,6 +95,10 @@ function Viewall() {
             aValue = a.callback?.arranged || "";
             bValue = b.callback?.arranged || "";
         }
+        if (sortField === "remarks") {
+            aValue = a.remarks || "";
+            bValue = b.remarks || "";
+        }
 
         if (sortField === "createdAt") {
             return sortOrder === "asc"
@@ -158,33 +162,164 @@ function Viewall() {
 
 
 
-    // 🔹 Export to PDF
-    const exportToPDF = () => {
-        const doc = new jsPDF();
-        doc.text("All Students", 14, 10);
 
-        doc.autoTable({
-            startY: 20,
-            head: [["Name", "Class", "School", "District", "Payment", "Created"]],
-            body: filteredStudents.map((s) => [
-                s.studentName,
-                s.classLevel,
-                s.institution,
-                s.district,
-                s.payment?.status || "-",
-                new Date(s.createdAt).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                }),
-            ]),
-        });
 
-        doc.save("students.pdf");
-    };
+
+const exportToPDF = () => {
+  const doc = new jsPDF("l", "mm", "a4");
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  /* ===== HEADER ===== */
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Student Records Report", pageWidth / 2, 14, { align: "center" });
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    `Generated on: ${new Date().toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })}`,
+    pageWidth / 2,
+    20,
+    { align: "center" }
+  );
+
+  doc.text(`Total Students: ${filteredStudents.length}`, 14, 20);
+
+  /* ===== TABLE ===== */
+  autoTable(doc, {
+    startY: 26,
+    theme: "striped",
+
+    head: [[
+      "Student (Phone)",
+      "Parents (Name + Phone)",
+      "Course",
+      "Institution",
+      "Callback Details",
+      "Payment Details"
+    ]],
+
+    body: filteredStudents.map((s) => {
+      const studentPhone = s.contacts?.find(c => c.relation === "Self")?.phone || "-";
+      const fatherPhone = s.contacts?.find(c => c.relation === "Father")?.phone || "-";
+      const motherPhone = s.contacts?.find(c => c.relation === "Mother")?.phone || "-";
+
+      // Parents
+      const parentsDisplay = [
+        `Father: ${s.fatherName || "-"}\n ${fatherPhone}`,
+        `Mother: ${s.motherName || "-"}\n ${motherPhone}`
+      ].join("\n");
+
+      // Course (class + syllabus)
+      const courseDisplay = `${s.classLevel || "-"} ${s.syllabus ? "- " + s.syllabus : ""}`;
+
+      // Institution (school + district)
+      const institutionDisplay = `${s.institution || "-"}\n${s.district || "-"}`;
+
+      // Callback (latest arranged)
+      const cb = Array.isArray(s.callback)
+        ? s.callback
+            .filter(c => c.arranged === "Yes")
+            .sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime))[0]
+        : null;
+
+      const callbackDisplay = cb
+        ? [
+            `Status: ${cb.arranged}`,
+            `Time: ${cb.dateTime ? new Date(cb.dateTime).toLocaleString("en-IN", {
+              day: "2-digit", month: "short", year: "numeric",
+              hour: "2-digit", minute: "2-digit", hour12: true
+            }) : "-"}`,
+            `Initiator: ${cb.caller || "-"}`,
+            `Handler: ${cb.handler || "-"}`,
+            `Type: ${cb.callType || "-"}`
+          ].join("\n")
+        : "No callback";
+
+      // Payment summary
+      const pay = s.payment;
+
+      let paymentDisplay;
+      if (pay) {
+        // sum actual paid amount from transactions
+        const paidAmount = (pay.transactions ?? []).reduce((sum, t) => sum + (t.amount || 0), 0);
+        const remainingAmount = (pay.totalAmount || 0) - paidAmount;
+
+        paymentDisplay = [
+          `Status: ${pay.status || "-"}`,
+          `Total: ₹${pay.totalAmount ?? 0}`,
+          `Paid: ₹${paidAmount}`,
+          `Balance: ₹${remainingAmount}`
+        ].join("\n");
+      } else {
+        paymentDisplay = "No payment";
+      }
+
+      return [
+        `${s.studentName}\n ${studentPhone}`,
+        parentsDisplay,
+        courseDisplay,
+        institutionDisplay,
+        callbackDisplay,
+        paymentDisplay,
+      ];
+    }),
+
+    headStyles: {
+      fillColor: [33, 37, 41],
+      textColor: 255,
+      fontSize: 10,
+      halign: "center",
+    },
+
+    bodyStyles: {
+      fontSize: 8,
+      valign: "top",
+    },
+
+    styles: {
+      overflow: "linebreak",
+      cellPadding: 3,
+    },
+
+    columnStyles: {
+      0: { cellWidth: 40 },
+      1: { cellWidth: 50 },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 55 },
+      4: { cellWidth: 50 },
+      5: { cellWidth: 55 },
+    },
+
+    didDrawPage: () => {
+      const pageCount = doc.internal.getNumberOfPages();
+      doc.setFontSize(9);
+      doc.text(
+        `Page ${pageCount}`,
+        pageWidth / 2,
+        pageHeight - 8,
+        { align: "center" }
+      );
+    },
+  });
+
+  doc.save("student-records.pdf");
+};
+
+
+
+
+
+
 
     return (
         <>
@@ -260,7 +395,9 @@ function Viewall() {
                                         District <SortIcon field="district" />
                                     </th>
 
-
+                                    <th onClick={() => handleSort("district")}>
+                                        Remarks <SortIcon field="district" />
+                                    </th>
                                     <th onClick={() => handleSort("callback.arranged")}>
                                         Callback <SortIcon field="callback.arranged" />
                                     </th>
@@ -326,7 +463,9 @@ function Viewall() {
                                                 <td>{s.institution}</td>
                                                 <td>{s.district}</td>
 
-
+                                                <td className={viewAllcss.remarksCell} title={s.remarks}>
+                                                    {s.remarks || "—"}
+                                                </td>
                                                 <td className={viewAllcss.callbackCell}>
                                                     {(() => {
                                                         const cb = getCallbackDisplay(s.callback);
@@ -375,8 +514,15 @@ function Viewall() {
 
                                                 <td className={viewAllcss.actionCell}>
                                                     <div className={viewAllcss.actionButtons}>
-                                                        <AddPaymentModal student={s}
-                                                        onPaymentUpdated={fetchStudents} />
+                                                        <AddPaymentModal
+                                                            student={s}
+                                                            onPaymentUpdated={fetchStudents}
+                                                        />
+
+                                                        <AddCallLogModal
+                                                            studentId={s._id}
+                                                            onSaved={fetchStudents}
+                                                        />
                                                     </div>
                                                 </td>
 

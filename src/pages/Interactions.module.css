@@ -1,10 +1,28 @@
 /* ===== Container ===== */
+
+/* ===== Full Page Background ===== */
+.page {
+  background: linear-gradient(135deg, #eef2f7, #f8f9fa);
+  min-height: 100vh;
+  padding: 10px;
+}
+
+/* ===== Centered Content ===== */
+.pageContainer {
+  display: flex;
+  justify-content: center;
+}
+
+/* Existing container stays same */
 .container {
   background-color: #ffffff;
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 5px;
+  padding: 5px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  width: 100%;
 }
+
+
 
 /* ===== Heading ===== */
 .heading {
@@ -104,4 +122,18 @@
     min-width: 32px;
     height: 32px;
   }
+}
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.actionButtons button {
+  width: 130px;
+  height: 32px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

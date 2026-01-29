@@ -48,12 +48,45 @@ function HistoryStudentModal({ show, onHide }) {
                 </Card>
               </Col>
               <Col>
-                <Card body className={historyStyles.summaryCard}>Total Amount: <div className={historyStyles.summaryValue}>₹{data.totalAmountReceived}</div></Card>
+                <Card body className={historyStyles.summaryCard}>
+                  Total Amount:
+                  <div className={historyStyles.summaryValue}>₹{data.totalAmountReceived}</div>
+                </Card>
               </Col>
               <Col>
-                <Card body className={historyStyles.summaryCard}>Callbacks: <div className={historyStyles.summaryValue} >{data.totalCallbacks}</div></Card>
+                <Card body className={historyStyles.summaryCard}>
+                  Callbacks:
+                  <div className={historyStyles.summaryValue}>{data.totalCallbacks}</div>
+                </Card>
               </Col>
             </Row>
+
+            {/* ⭐ New Call Logs Section */}
+            <h6 className={historyStyles.sectionTitle}>Call Logs by Student</h6>
+            <Table bordered className={historyStyles.table}>
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Call Logs Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.callLogsByStudent.length > 0 ? (
+                  data.callLogsByStudent.map((cl, idx) => (
+                    <tr key={idx}>
+                      <td>{cl.studentName}</td>
+                      <td>{cl.callLogsCount}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="2" className="text-center">
+                      No call logs found for this date
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
 
             {/* Class-wise */}
             <h6 className={historyStyles.sectionTitle}>Class-wise Count</h6>
