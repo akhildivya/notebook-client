@@ -53,7 +53,7 @@
 /* TABLE */
 .tableWrapper {
   border-radius: 10px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .table {
@@ -160,6 +160,7 @@ th:hover .sortIcon {
 .callbackBell {
     color: #f39c12; /* gold */
     font-weight: bold;
+    position: relative;
 }
 
 .callbackOver {
@@ -173,4 +174,108 @@ th:hover .sortIcon {
 
 .callbackNo {
     color: #7f8c8d; /* gray */
+}
+/* container */
+.callbackCell {
+  position: relative;
+}
+
+.callbackWrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* COMMON TOOLTIP STYLES */
+.callbackTooltip {
+  position: absolute;
+  top: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-width: 300px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  color: #212529;
+  z-index: 1000;
+  display: none;
+  text-align: left;
+  gap: 6px;
+}
+
+/* Tooltip arrow */
+.callbackTooltip::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+/* Show tooltip on hover */
+.callbackWrapper:hover .callbackTooltip {
+  display: flex;
+}
+
+/* VERTICAL TOOLTIP */
+.callbackTooltip.vertical {
+  flex-direction: column; /* stack fields vertically */
+}
+
+.callbackTooltip.vertical p {
+  margin: 0;
+  line-height: 1.4;
+  display: flex;
+  justify-content: flex-start; /* label and value in column */
+}
+
+.callbackTooltip.vertical p strong {
+  margin-right: 6px;
+  min-width: 60px; /* labels aligned */
+}
+
+/* HORIZONTAL TOOLTIP */
+.callbackTooltip.horizontal {
+  flex-direction: row; /* fields side by side */
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.callbackTooltip.horizontal p {
+  margin: 0 8px 4px 0;
+  display: flex;
+  gap: 4px;
+}
+
+.callbackTooltip.horizontal p strong {
+  min-width: auto;
+  margin-right: 2px;
+}
+
+/* ACTION COLUMN */
+.actionCell {
+  white-space: nowrap;      /* prevent wrapping */
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* BUTTON WRAPPER */
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Optional: make buttons compact & consistent */
+.actionButtons button {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
 }

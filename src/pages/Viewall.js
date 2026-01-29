@@ -7,9 +7,10 @@ import { Table, Button, Form } from "react-bootstrap";
 import viewAllcss from "./Viewall.module.css";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-
+import AddPaymentModal from "../components/Modals/AddPaymentModal";
 import axios from "axios";
 import { BASEURL } from "../service/baseUrl";
+import PaymentStatusBadge from "../components/Modals/PaymentStatusBadge";
 
 function Viewall() {
     const navigate = useNavigate();
@@ -124,22 +125,38 @@ function Viewall() {
         );
     };
 
-const getCallbackDisplay = (callback) => {
-    if (!callback?.arranged || callback.arranged !== "Yes") {
-        return { label: "No", type: "none" };
-    }
-    if (!callback.dateTime) {
-        return { label: "Yes", type: "scheduled" };
-    }
+    const getCallbackDisplay = (callbacks) => {
+        if (!Array.isArray(callbacks) || callbacks.length === 0) {
+            return { label: "No", type: "none", details: null };
+        }
 
-    const callbackTime = new Date(callback.dateTime).getTime();
-    const now = Date.now();
+        const arrangedCb = callbacks
+            .filter(c => c.arranged === "Yes")
+            .sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime))[0];
 
-    if (now < callbackTime) {
-        return { label: "🔔", type: "upcoming", dateTime: callbackTime };
-    }
-    return { label: "Date Over", type: "over" };
-};
+        if (!arrangedCb) return { label: "No", type: "none", details: null };
+
+        let type = "none";
+        const now = Date.now();
+        let cbTime = arrangedCb.dateTime ? new Date(arrangedCb.dateTime).getTime() : null;
+
+        if (!arrangedCb.dateTime) type = "scheduled";
+        else if (now < cbTime) type = "upcoming";
+        else type = "over";
+
+        return {
+            label: type === "upcoming" ? "🔔" : type === "over" ? "Time expired" : "Yes",
+            type,
+            dateTime: arrangedCb.dateTime,
+            details: {
+                handler: arrangedCb.handler || "-",
+                caller: arrangedCb.caller || "-",
+                callType: arrangedCb.callType || "-"
+            }
+        };
+    };
+
+
 
     // 🔹 Export to PDF
     const exportToPDF = () => {
@@ -243,15 +260,18 @@ const getCallbackDisplay = (callback) => {
                                         District <SortIcon field="district" />
                                     </th>
 
-                                    <th onClick={() => handleSort("payment.status")}>
-                                        Status <SortIcon field="payment.status" />
-                                    </th>
+
                                     <th onClick={() => handleSort("callback.arranged")}>
                                         Callback <SortIcon field="callback.arranged" />
                                     </th>
+                                    <th onClick={() => handleSort("payment.status")}>
+                                        Status <SortIcon field="payment.status" />
+                                    </th>
+                                    <th>Action</th>
                                     <th onClick={() => handleSort("createdAt")}>
                                         Created <SortIcon field="createdAt" />
                                     </th>
+
                                 </tr>
                             </thead>
 
@@ -269,7 +289,11 @@ const getCallbackDisplay = (callback) => {
 
                                         return (
                                             <tr key={s._id}>
-                                                <td className={viewAllcss.name}>{s.studentName}</td>
+                                                <td className={viewAllcss.name}>{s.studentName}{s.contacts?.find(c => c.relation === "Self")?.phone && (
+                                                    <div className={viewAllcss.personPhone}>
+                                                        📱 {s.contacts.find(c => c.relation === "Self").phone}
+                                                    </div>
+                                                )}</td>
 
                                                 <td>
                                                     <div className={viewAllcss.person}>
@@ -277,7 +301,7 @@ const getCallbackDisplay = (callback) => {
                                                             {s.fatherName || "-"}
                                                         </span>
                                                         <span className={viewAllcss.personPhone}>
-                                                            📞 {fatherPhone || "—"}
+                                                            📱 {fatherPhone || "—"}
                                                         </span>
                                                     </div>
                                                 </td>
@@ -288,7 +312,7 @@ const getCallbackDisplay = (callback) => {
                                                             {s.motherName || "-"}
                                                         </span>
                                                         <span className={viewAllcss.personPhone}>
-                                                            📞 {motherPhone || "—"}
+                                                            📱 {motherPhone || "—"}
                                                         </span>
                                                     </div>
                                                 </td>
@@ -302,48 +326,59 @@ const getCallbackDisplay = (callback) => {
                                                 <td>{s.institution}</td>
                                                 <td>{s.district}</td>
 
-                                                <td>
-                                                    <span
-                                                        className={`${viewAllcss.status} ${viewAllcss[s.payment?.status?.replace(" ", "")]
-                                                            }`}
-                                                    >
-                                                        {s.payment?.status || "—"}
-                                                    </span>
+
+                                                <td className={viewAllcss.callbackCell}>
+                                                    {(() => {
+                                                        const cb = getCallbackDisplay(s.callback);
+
+                                                        return (
+                                                            <div className={viewAllcss.callbackWrapper}>
+                                                                {/* LABEL */}
+                                                                <span
+                                                                    className={`${viewAllcss.callbackLabel} ${cb.type === "upcoming"
+                                                                        ? viewAllcss.callbackBell
+                                                                        : cb.type === "over"
+                                                                            ? viewAllcss.callbackOver
+                                                                            : cb.type === "scheduled"
+                                                                                ? viewAllcss.callbackYes
+                                                                                : viewAllcss.callbackNo
+                                                                        }`}
+                                                                >
+                                                                    {cb.label}
+                                                                </span>
+
+                                                                {/* TOOLTIP */}
+                                                                {cb.details && (
+                                                                    <div className={`${viewAllcss.callbackTooltip} vertical`}>
+                                                                        <p><strong>Handler:</strong> {cb.details.handler}</p>
+                                                                        <p><strong>Caller:</strong> {cb.details.caller}</p>
+                                                                        <p><strong>Type:</strong> {cb.details.callType}</p>
+                                                                        <p><strong>Time:</strong> {cb.dateTime && new Date(cb.dateTime).toLocaleString("en-IN", {
+                                                                            day: "2-digit",
+                                                                            month: "short",
+                                                                            year: "numeric",
+                                                                            hour: "2-digit",
+                                                                            minute: "2-digit",
+                                                                            second: "2-digit",
+                                                                            hour12: true,
+                                                                        }).replace(",", "")}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })()}
                                                 </td>
-                                               <td>
-    {(() => {
-        const cb = getCallbackDisplay(s.callback);
+                                                <td>
+                                                    <PaymentStatusBadge payment={s.payment} />
+                                                </td>
 
-        switch (cb.type) {
-            case "upcoming":
-                return (
-                    <div>
-                        <span className={viewAllcss.callbackBell}>🔔</span>
-                        <br />
-                        <small>
-                            {new Date(s.callback.dateTime).toLocaleString("en-IN", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                                hour12: true,
-                            })}
-                        </small>
-                    </div>
-                );
 
-            case "over":
-                return <span className={viewAllcss.callbackOver}>Date Over</span>;
-
-            case "scheduled":
-                return <span className={viewAllcss.callbackYes}>Yes</span>;
-
-            default:
-                return <span className={viewAllcss.callbackNo}>No</span>;
-        }
-    })()}
-</td>
+                                                <td className={viewAllcss.actionCell}>
+                                                    <div className={viewAllcss.actionButtons}>
+                                                        <AddPaymentModal student={s}
+                                                        onPaymentUpdated={fetchStudents} />
+                                                    </div>
+                                                </td>
 
 
                                                 <td>

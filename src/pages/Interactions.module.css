@@ -1,25 +1,107 @@
+/* ===== Container ===== */
 .container {
   background-color: #ffffff;
-  border-radius: 8px;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
+/* ===== Heading ===== */
 .heading {
   font-weight: 600;
-  margin-bottom: 16px;
+  font-size: 1.25rem;
+  color: #343a40;
 }
 
-.table th {
+/* ===== Table ===== */
+.table {
+  margin-top: 8px;
+  font-size: 0.92rem;
+}
+
+.table thead th {
   background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.table thead th:hover {
+  background-color: #e9ecef;
+}
+
+/* Sort arrow subtle alignment */
+.table thead th span {
+  margin-left: 4px;
+}
+
+/* Table rows */
+.table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #fdfefe;
+}
+
+/* Phone text */
+.table .text-muted {
+  font-size: 0.8rem;
+}
+
+/* ===== Action Buttons Column ===== */
+.table td:last-child {
   white-space: nowrap;
 }
 
+/* ===== Pagination ===== */
 .pagination {
   display: flex;
   justify-content: center;
   gap: 6px;
-  margin-top: 16px;
+  margin-top: 18px;
+  flex-wrap: wrap;
 }
 
 .pagination button {
   min-width: 36px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.pagination button:hover {
+  transform: translateY(-1px);
+}
+
+/* Active page */
+.pagination .btn-primary {
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.35);
+}
+
+/* Disabled */
+.pagination button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Responsive tweaks ===== */
+@media (max-width: 768px) {
+  .heading {
+    font-size: 1.1rem;
+  }
+
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .pagination button {
+    min-width: 32px;
+    height: 32px;
+  }
 }

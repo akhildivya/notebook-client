@@ -105,23 +105,23 @@ function Interactions() {
               Name{renderSortArrow("studentName")}
             </th>
             <th onClick={() => handleSort("fatherName")}>
-  Father{renderSortArrow("fatherName")}
-</th>
+              Father{renderSortArrow("fatherName")}
+            </th>
             <th onClick={() => handleSort("motherName")}>
-  Mother{renderSortArrow("motherName")}
-</th>
-           <th onClick={() => handleSort("classLevel")}>
-  Class{renderSortArrow("classLevel")}
-</th>
-           <th onClick={() => handleSort("syllabus")}>
-  Syllabus{renderSortArrow("syllabus")}
-</th>
-           <th onClick={() => handleSort("institution")}>
-  School{renderSortArrow("institution")}
-</th>
-           <th onClick={() => handleSort("district")}>
-  District{renderSortArrow("district")}
-</th>
+              Mother{renderSortArrow("motherName")}
+            </th>
+            <th onClick={() => handleSort("classLevel")}>
+              Class{renderSortArrow("classLevel")}
+            </th>
+            <th onClick={() => handleSort("syllabus")}>
+              Syllabus{renderSortArrow("syllabus")}
+            </th>
+            <th onClick={() => handleSort("institution")}>
+              School{renderSortArrow("institution")}
+            </th>
+            <th onClick={() => handleSort("district")}>
+              District{renderSortArrow("district")}
+            </th>
             <th>Status</th>
             <th>Actions</th>
           </tr>

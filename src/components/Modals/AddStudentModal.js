@@ -32,8 +32,8 @@ function AddStudentModal({ show, onHide }) {
 
     const classLevels = ["Plus One", "Plus Two", "BTech"];
     const syllabusOptions = ["CBSE", "ICSE", "HSE", "KTU"];
-    const relationOptions = ["Father", "Mother", "Guardian", "Other", "Self"];
-    const paymentOptions = ["Paid", "Agreed"];
+    const relationOptions = ["Father", "Mother", "Guardian", "Self"];
+
     const resetForm = () => {
         setStudentName("");
         setFatherName("");
@@ -46,10 +46,10 @@ function AddStudentModal({ show, onHide }) {
 
         setContacts([{ phone: "", relation: "----- " }]);
 
-        setPaymentType("");
+
         setTotalAmount("");
         setPaidAmount("");
-        setAgreedAmount("");
+
         setPaidDateTime(null);
         setPaymentMethod(" ");
         setPaymentStatus("Pending");
@@ -63,9 +63,13 @@ function AddStudentModal({ show, onHide }) {
         setErrors({});
     };
 
-    const [paymentType, setPaymentType] = useState(""); // "Paid" or "Agreed"
+    // "Paid" or "Agreed"
 
     const [paidDateTime, setPaidDateTime] = useState(null);
+
+
+
+
     const [contacts, setContacts] = useState([
         { phone: "", relation: "" }
     ]);
@@ -73,8 +77,7 @@ function AddStudentModal({ show, onHide }) {
 
     const [paymentStatus, setPaymentStatus] = useState("Pending");
     const [paymentMethod, setPaymentMethod] = useState("");
-    const [agreedAmount, setAgreedAmount] = useState("");
-    const [agreedDateTime, setAgreedDateTime] = useState(null)
+
     const [paidAmount, setPaidAmount] = useState("");
     const [totalAmount, setTotalAmount] = useState("");
     const [callbackHandler, setCallbackHandler] = useState("");
@@ -92,7 +95,7 @@ function AddStudentModal({ show, onHide }) {
 
     const textRegex = /^[A-Za-z.,\-\s]*$/;
     const numberRegex = /^[0-9]*$/;
-    const phoneRegex = /^[0-9]{0,15}$/;
+    const phoneRegex = /^[0-9]{0,10}$/;
 
     const [errors, setErrors] = useState({});
 
@@ -123,6 +126,14 @@ function AddStudentModal({ show, onHide }) {
                 [field]: "Invalid format — only numbers are allowed"
             }));
         }
+    };
+
+    const hasDuplicatePhones = (contacts) => {
+        const phones = contacts
+            .map(c => c.phone)
+            .filter(p => p && p.length === 10);
+
+        return new Set(phones).size !== phones.length;
     };
 
     const handleContactChange = (index, field, value) => {
@@ -162,64 +173,98 @@ function AddStudentModal({ show, onHide }) {
     };
 
 
-    const handleSaveStudent = async () => {
-        try {
-            const cleanedContacts = contacts.filter(
-                c => c.phone && c.phone.trim() !== ""
-            );
-            const payload = {
-                studentName,
-                fatherName,
-                motherName,
-                contacts: cleanedContacts,
-                institution,
-                district,
-                classLevel,
-                syllabus,
-                remarks,
+   const handleSaveStudent = async () => {
+  try {
+    const cleanedContacts = contacts.filter(
+      (c) => c.phone && c.phone.trim() !== ""
+    );
 
-                payment: {
-                    totalAmount: totalAmount || undefined,
-                    type: paymentType,
-                    agreedAmount: paymentType === "Agreed" ? agreedAmount : undefined,
-                    agreedDateTime: paymentType === "Agreed" ? agreedDateTime : undefined,
+    // 🔴 SAME STUDENT DUPLICATE CHECK
+    if (hasDuplicatePhones(cleanedContacts)) {
+      toast.error(
+        "Same phone number cannot be used for Father/Mother/Guardian",
+        { position: "top-center" }
+      );
+      return;
+    }
 
-                    transactions: paymentType === "Paid"
-                        ? [
-                            {
-                                amount: Number(paidAmount),
-                                dateTime: paidDateTime,
-                                method: paymentMethod || undefined
-                            }
-                        ]
-                        : [],
+    // 🔹 Phone length validation
+    for (let c of cleanedContacts) {
+      if (c.phone.length !== 10) {
+        toast.error("Phone number must be exactly 10 digits", {
+          position: "top-center"
+        });
+        return;
+      }
+    }
 
-                    status: paymentStatus // 'Pending' by default
-                },
-
-                callback:
-                    callbackArranged === "Yes"
-                        ? {
-                            arranged: "Yes",
-                            dateTime: callbackDateTime,
-                            handler: callbackHandler,
-                            caller: callbackCaller,
-                            callType: callbackCallType
-                        }
-                        : { arranged: "No" }
-            };
-
-
-
-            await axios.post(`${BASEURL}/create-student`, payload);
-            toast.success("Student added successfully ✅", { position: 'top-center' });
-            resetForm();
-            onHide();
-        } catch (err) {
-
-            toast.error(err.response?.data?.error || "Failed to save student", { position: 'top-center' });
-        }
+    const payload = {
+      studentName,
+      fatherName,
+      motherName,
+      contacts: cleanedContacts,
+      institution,
+      district,
+      classLevel,
+      syllabus,
+      remarks,
+      payment: {
+        totalAmount: Number(totalAmount),
+        transactions:
+          Number(paidAmount) > 0
+            ? [{
+                amount: Number(paidAmount),
+                dateTime: paidDateTime,
+                method: paymentMethod
+              }]
+            : []
+      },
+      callback:
+        callbackArranged === "Yes"
+          ? [{
+              arranged: "Yes",
+              dateTime: callbackDateTime,
+              handler: callbackHandler,
+              caller: callbackCaller,
+              callType: callbackCallType
+            }]
+          : [{ arranged: "No" }]
     };
+
+    await axios.post(`${BASEURL}/create-student`, payload);
+
+    toast.success("Student added successfully ✅", {
+      position: "top-center"
+    });
+
+    resetForm();
+    onHide();
+
+  } catch (err) {
+    if (
+      err.response?.data?.error?.toLowerCase().includes("same phone")
+    ) {
+      toast.error(err.response.data.error, {
+        position: "top-center"
+      });
+      return;
+    }
+
+    if (
+      err.response?.data?.error?.toLowerCase().includes("registered")
+    ) {
+      toast.error("📵 This phone number is already registered", {
+        position: "top-center"
+      });
+      return;
+    }
+
+    toast.error("Failed to save student ❌", {
+      position: "top-center"
+    });
+  }
+};
+
 
 
     return (
@@ -385,94 +430,51 @@ function AddStudentModal({ show, onHide }) {
 
                         <Accordion.Body className={styles.accordionBody}>
                             <Form>
+                                {/* TOTAL AMOUNT */}
+                                <Form.Control
+                                    placeholder="Total Amount"
+                                    className={`mb-2 ${styles.formControl}`}
+                                    value={totalAmount}
+                                    onChange={handleNumberChange("totalAmount", setTotalAmount)}
+                                />
 
-                                {/* PAYMENT TYPE */}
-                                <Dropdown className="mb-3 w-100">
-                                    <Dropdown.Toggle
-                                        variant="outline-secondary"
-                                        className={`${styles.formControl} w-100 text-start`}
-                                    >
-                                        {paymentType || "Select Payment Mode"}
-                                    </Dropdown.Toggle>
+                                {/* PAID AMOUNT */}
+                                <Form.Control
+                                    placeholder="Paid Amount"
+                                    className={`mb-2 ${styles.formControl}`}
+                                    value={paidAmount}
+                                    onChange={handleNumberChange("paidAmount", setPaidAmount)}
+                                />
 
-                                    <Dropdown.Menu className="w-100">
-
-                                        {paymentOptions.map((type) => (
-                                            <Dropdown.Item
-                                                key={type}
-                                                onClick={() => {
-                                                    setPaymentType(type);
-                                                    setPaymentStatus("Pending");
-                                                }}
-                                            >
-                                                {type}
-                                            </Dropdown.Item>
-                                        ))}
-                                    </Dropdown.Menu>
-                                </Dropdown>
-
-                                {/* ======================= PAID ======================= */}
-                                {paymentType === "Paid" && (
+                                {/* SHOW ONLY IF PAID AMOUNT > 0 */}
+                                {Number(paidAmount) > 0 && (
                                     <>
-                                        <Form.Control
-                                            placeholder="Total Amount"
-                                            className={`mb-2 ${styles.formControl}`}
-                                            value={totalAmount}
-
-                                            onChange={handleNumberChange("totalAmount", setTotalAmount)}
-                                        />
-                                        {errors.totalAmount && <div className={styles.warning}>{errors.totalAmount}</div>}
-                                        <Form.Control
-                                            placeholder="Amount Paid"
-                                            className={`mb-1 ${styles.formControl}`}
-                                            value={paidAmount}
-                                            onChange={(e) => {
-                                                if (numberRegex.test(e.target.value)) {
-                                                    setPaidAmount(e.target.value);
-                                                    setErrors((prev) => ({ ...prev, paidAmount: "" }));
-
-                                                    if (Number(e.target.value) >= Number(totalAmount)) {
-                                                        setPaymentStatus("Completed");
-                                                    } else {
-                                                        setPaymentStatus("Pending");
-                                                    }
-                                                } else {
-                                                    setErrors((prev) => ({
-                                                        ...prev,
-                                                        paidAmount: "Invalid format — only numbers are allowed"
-                                                    }));
-                                                }
-                                            }}
-                                        />
-                                        {errors.paidAmount && <div className={styles.warning}>{errors.paidAmount}</div>}
-
-
+                                        {/* DATE & TIME */}
                                         <div className={`${styles.datePicker} mb-2`}>
                                             <DatePicker
                                                 selected={paidDateTime}
                                                 onChange={(date) => setPaidDateTime(date)}
                                                 showTimeSelect
                                                 timeFormat="hh:mm aa"
-                                                timeIntervals={1}
                                                 dateFormat="dd/MM/yyyy hh:mm aa"
                                                 placeholderText="Payment Date & Time"
-                                                className={`form-control ${styles.formControl} mb-2`}
+                                                className={`form-control ${styles.formControl}`}
                                             />
                                         </div>
 
+                                        {/* PAYMENT METHOD */}
                                         <Dropdown className="mb-2 w-100">
                                             <Dropdown.Toggle
                                                 variant="outline-secondary"
                                                 className={`${styles.formControl} w-100 text-start`}
                                             >
-                                                {paymentMethod || "Select Method"}
+                                                {paymentMethod || "Select Payment Method"}
                                             </Dropdown.Toggle>
 
                                             <Dropdown.Menu className="w-100">
                                                 {["UPI", "Cash", "Bank Transfer"].map((method) => (
                                                     <Dropdown.Item
                                                         key={method}
-                                                        active={paymentMethod === method}
                                                         onClick={() => setPaymentMethod(method)}
                                                     >
                                                         {method}
@@ -480,71 +482,10 @@ function AddStudentModal({ show, onHide }) {
                                                 ))}
                                             </Dropdown.Menu>
                                         </Dropdown>
-
-
-                                        {/* STATUS RADIO */}
-                                        <Form.Label className="fw-semibold mt-2">Payment Status</Form.Label>
-                                        <div className="d-flex gap-3 mb-2">
-                                            <Form.Check
-                                                type="radio"
-                                                label="Pending"
-                                                checked={paymentStatus === "Pending"}
-                                                onChange={() => setPaymentStatus("Pending")}
-                                            />
-                                            <Form.Check
-                                                type="radio"
-                                                label="Completed"
-                                                checked={paymentStatus === "Completed"}
-                                                onChange={() => setPaymentStatus("Completed")}
-                                            />
-                                        </div>
                                     </>
                                 )}
-
-                                {/* ======================= AGREED ======================= */}
-                                {paymentType === "Agreed" && (
-                                    <>
-                                        <Form.Control
-                                            placeholder="Agreed Amount"
-                                            className={`mb-2 ${styles.formControl}`}
-                                            value={agreedAmount}
-
-                                            onChange={handleNumberChange("agreedAmount", setAgreedAmount)}
-                                        />
-                                        {errors.agreedAmount && <div className={styles.warning}>{errors.agreedAmount}</div>}
-                                        <div className={`${styles.datePicker} mb-2`}>
-                                            <DatePicker
-                                                selected={paidDateTime}
-                                                onChange={(date) => setPaidDateTime(date)}
-                                                showTimeSelect
-                                                timeFormat="hh:mm aa"
-                                                timeIntervals={1}
-                                                dateFormat="dd/MM/yyyy hh:mm aa"
-                                                placeholderText="Agreed Date & Time"
-                                                className={`form-control ${styles.formControl} mb-2`}
-                                            />
-                                        </div>
-
-                                        {/* STATUS RADIO */}
-                                        <Form.Label className="fw-semibold mt-2">Payment Status</Form.Label>
-                                        <div className="d-flex gap-3 mb-2">
-                                            <Form.Check
-                                                type="radio"
-                                                label="Pending"
-                                                checked={paymentStatus === "Pending"}
-                                                onChange={() => setPaymentStatus("Pending")}
-                                            />
-                                            <Form.Check
-                                                type="radio"
-                                                label="Completed"
-                                                checked={paymentStatus === "Completed"}
-                                                onChange={() => setPaymentStatus("Completed")}
-                                            />
-                                        </div>
-                                    </>
-                                )}
-
                             </Form>
+
                         </Accordion.Body>
                     </Accordion.Item>
 
