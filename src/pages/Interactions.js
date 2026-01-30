@@ -4,6 +4,7 @@ import axios from "axios";
 import { Button, Form, Table } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import interactionStyles from "./Interactions.module.css";
+import { Accordion } from "react-bootstrap";
 
 function Interactions() {
   const navigate = useNavigate();
@@ -18,6 +19,12 @@ function Interactions() {
   // 🔹 Sorting
   const [sortField, setSortField] = useState("studentName");
   const [sortOrder, setSortOrder] = useState("asc");
+
+
+  const [expandedRow, setExpandedRow] = useState(null);
+  const [activeTab, setActiveTab] = useState(null);
+  const [paymentData, setPaymentData] = useState(null);
+  const [callData, setCallData] = useState(null);
 
   const fetchStudents = async () => {
     try {
@@ -34,6 +41,36 @@ function Interactions() {
   useEffect(() => {
     fetchStudents();
   }, []);
+
+  const openPayments = async (studentId) => {
+    try {
+      const res = await axios.get(
+        `${BASEURL}/students/payments/${studentId}`
+      );
+      setPaymentData(res.data);
+      setCallData(null);
+      setExpandedRow(studentId);
+      setActiveTab("payments");
+    } catch (err) {
+      console.error("Payments API error", err);
+    }
+  };
+
+
+  const openCalls = async (studentId) => {
+    try {
+      const res = await axios.get(
+        `${BASEURL}/students/calls/${studentId}`
+      );
+      setCallData(res.data);
+      setPaymentData(null);
+      setExpandedRow(studentId);
+      setActiveTab("calls");
+    } catch (err) {
+      console.error("Calls API error", err);
+    }
+  };
+
 
   // 🔹 Sort handler
   const handleSort = (field) => {
@@ -111,71 +148,175 @@ function Interactions() {
             <tbody>
               {paginatedStudents.length > 0 ? (
                 paginatedStudents.map((s) => (
-                  <tr key={s._id}>
-                    {/* STUDENT */}
-                    <td>
-                      <strong>{s.studentName}</strong>
-                      {getPhone(s.contacts, "Self") && (
-                        <div className="text-muted small">
-                          📞 {getPhone(s.contacts, "Self")}
+                  <React.Fragment key={s._id}>
+                    {/* ================= MAIN ROW ================= */}
+                    <tr>
+                      {/* STUDENT */}
+                      <td>
+                        <strong>{s.studentName}</strong>
+                        {getPhone(s.contacts, "Self") && (
+                          <div className="text-muted small">
+                            📞 {getPhone(s.contacts, "Self")}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* PARENTS */}
+                      <td>
+                        <div>
+                          <strong>Father:</strong> {s.fatherName || "-"}
+                          {getPhone(s.contacts, "Father") && (
+                            <div className="text-muted small">
+                              📞 {getPhone(s.contacts, "Father")}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </td>
 
-                    {/* PARENTS */}
-                    <td>
-                      <div>
-                        <strong>Father:</strong> {s.fatherName || "-"}
-                        {getPhone(s.contacts, "Father") && (
-                          <div className="text-muted small">
-                            📞 {getPhone(s.contacts, "Father")}
-                          </div>
-                        )}
-                      </div>
+                        <div className="mt-1">
+                          <strong>Mother:</strong> {s.motherName || "-"}
+                          {getPhone(s.contacts, "Mother") && (
+                            <div className="text-muted small">
+                              📞 {getPhone(s.contacts, "Mother")}
+                            </div>
+                          )}
+                        </div>
+                      </td>
 
-                      <div className="mt-1">
-                        <strong>Mother:</strong> {s.motherName || "-"}
-                        {getPhone(s.contacts, "Mother") && (
-                          <div className="text-muted small">
-                            📞 {getPhone(s.contacts, "Mother")}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* COURSE */}
-                    <td>
-                      <div>
+                      {/* COURSE */}
+                      <td>
                         <strong>{s.classLevel}</strong>
-                      </div>
-                      <div className="text-muted small">
-                        {s.syllabus || "-"}
-                      </div>
-                    </td>
+                        <div className="text-muted small">{s.syllabus || "-"}</div>
+                      </td>
 
-                    {/* SCHOOL */}
-                    <td>
-                      <div>
+                      {/* SCHOOL */}
+                      <td>
                         <strong>{s.institution}</strong>
-                      </div>
-                      <div className="text-muted small">
-                        {s.district}
-                      </div>
-                    </td>
+                        <div className="text-muted small">{s.district}</div>
+                      </td>
 
-                    {/* ACTIONS */}
-                    <td>
-                      <div className={interactionStyles.actionButtons}>
-                        <Button size="sm" variant="outline-success">
-                          💳 Payments
-                        </Button>
-                        <Button size="sm" variant="outline-primary">
-                          📞 Calls
-                        </Button>
+                      {/* ACTIONS */}
+                      <td>
+                        <div className={interactionStyles.actionButtons}>
+                          <Button
+                            size="sm"
+                            variant="outline-success"
+                            onClick={() => openPayments(s._id)}
+                          >
+                            💳 Transactions
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline-primary"
+                            onClick={() => openCalls(s._id)}
+                          >
+                            📞 Call History
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
 
-                      </div>
-                    </td>
-                  </tr>
+                    {/* ================= EXPANDED ACCORDION ROW ================= */}
+                    {expandedRow === s._id && (
+                      <tr>
+                        <td colSpan="5">
+                          <Accordion defaultActiveKey="0">
+                            <Accordion.Item eventKey="0">
+                              <Accordion.Header>
+                                {activeTab === "payments"
+                                  ? "Payment History"
+                                  : "Call Logs"}
+                              </Accordion.Header>
+
+                              <Accordion.Body>
+                                {/* ===== PAYMENTS ===== */}
+                                {activeTab === "payments" && paymentData && (
+                                  <>
+                                    <p>
+                                      <strong>Total:</strong> ₹{paymentData.totalAmount}{" "}
+                                      | <strong>Paid:</strong> ₹
+                                      {paymentData.paidAmount} |{" "}
+                                      <strong>Status:</strong> {paymentData.status}
+                                    </p>
+
+                                    <Table size="sm" bordered>
+                                      <thead>
+                                        <tr>
+                                          <th>Date</th>
+                                          <th>Amount</th>
+                                          <th>Method</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {paymentData.transactions.map((t, i) => (
+                                          <tr key={i}>
+                                            <td>
+                                              {new Date(
+                                                t.dateTime
+                                              ).toLocaleString("en-IN", {
+                                                day: "2-digit",
+                                                month: "short",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                second: "2-digit",
+                                                hour12: true,
+                                              })}
+                                            </td>
+                                            <td>₹{t.amount}</td>
+                                            <td>{t.method}</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </Table>
+                                  </>
+                                )}
+
+                                {/* ===== CALL LOGS ===== */}
+                                {activeTab === "calls" && callData && (
+                                  <Table size="sm" bordered>
+                                    <thead>
+                                      <tr>
+                                        <th>Date</th>
+                                        <th>Caller</th>
+                                        <th>Handler</th>
+                                        <th>Type</th>
+                                        <th>Duration</th>
+                                        <th>Notes</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {callData.callLogs.map((c, i) => (
+                                        <tr key={i}>
+                                          <td>
+                                            {new Date(
+                                              c.dateTime
+                                            ).toLocaleString("en-IN", {
+                                              day: "2-digit",
+                                              month: "short",
+                                              year: "numeric",
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                              second: "2-digit",
+                                              hour12: true,
+                                            })}
+                                          </td>
+                                          <td>{c.caller}</td>
+                                          <td>{c.handler}</td>
+                                          <td>{c.callType}</td>
+                                          <td>{c.duration} sec</td>
+                                          <td>{c.notes || "-"}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </Table>
+                                )}
+                              </Accordion.Body>
+                            </Accordion.Item>
+                          </Accordion>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))
               ) : (
                 <tr>
@@ -185,8 +326,8 @@ function Interactions() {
                 </tr>
               )}
             </tbody>
-
           </Table>
+
 
           {/* 🔢 Pagination */}
           {totalPages > 1 && (

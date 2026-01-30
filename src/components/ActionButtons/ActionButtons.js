@@ -29,7 +29,7 @@ function ActionButtons({ onAdd, onSearch, onHistory, onInteractions }) {
 
         <button className={`${styles.btn} ${styles.historyBtn}`} onClick={onHistory}>
           <FaHistory />
-          <span>History</span>
+          <span>Date Log</span>
         </button>
         <button
           className={`${styles.btn} ${styles.interactionsBtn}`}
