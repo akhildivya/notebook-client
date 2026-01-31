@@ -302,7 +302,7 @@ function Interactions() {
 
   return (
     <div className={interactionStyles.page}>
-      <div className={`w-75 mx-auto ${interactionStyles.pageContainer}`}>
+      <div className={` ${interactionStyles.pageContainer}`}>
         <div className={`p-3 ${interactionStyles.container}`}>
           <div className="d-flex justify-content-between mb-3">
             <h4 className={interactionStyles.heading}>Student Interactions</h4>

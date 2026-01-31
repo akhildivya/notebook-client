@@ -1,1 +1,1 @@
-export const BASEURL=`http://localhost:4000`
+export const BASEURL='https://notebook-server-o2q7.onrender.com'

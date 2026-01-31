@@ -6,6 +6,7 @@ import { BASEURL } from "../../service/baseUrl";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+
 function AddCallLogModal({ studentId, onSaved }) {
   const [show, setShow] = useState(false);
 
@@ -13,13 +14,78 @@ function AddCallLogModal({ studentId, onSaved }) {
   const [caller, setCaller] = useState("");
   const [callType, setCallType] = useState("Outgoing");
   const [notes, setNotes] = useState("");
-  const [dateTime, setDateTime] = useState(new Date());
+  const [dateTime, setDateTime] = useState(null);
   const [minutes, setMinutes] = useState("");
   const [seconds, setSeconds] = useState("");
 
+  // validation state
+  const [handlerError, setHandlerError] = useState("");
+  const [callerError, setCallerError] = useState("");
+  const [notesError, setNotesError] = useState("");
+
+  const validateText = (value) => {
+    const regex = /^[A-Za-z\s.,]*$/;
+    return regex.test(value);
+  };
+
+  const handleHandlerChange = (e) => {
+    const value = e.target.value;
+    if (validateText(value)) {
+      setHandler(value);
+      setHandlerError("");
+    } else {
+      setHandlerError(
+        "Only letters, spaces, comma, and dot are allowed."
+      );
+    }
+  };
+
+  const handleCallerChange = (e) => {
+    const value = e.target.value;
+    if (validateText(value)) {
+      setCaller(value);
+      setCallerError("");
+    } else {
+      setCallerError(
+        "Only letters, spaces, comma, and dot are allowed."
+      );
+    }
+  };
+
+  const handleNotesChange = (e) => {
+    const value = e.target.value;
+    if (validateText(value)) {
+      setNotes(value);
+      setNotesError("");
+    } else {
+      setNotesError(
+        "Only letters, spaces, comma, and dot are allowed."
+      );
+    }
+  };
+const resetForm = () => {
+  setHandler("");
+  setCaller("");
+  setCallType("Outgoing");
+  setNotes("");
+  setDateTime(null);
+  setMinutes("");
+  setSeconds("");
+  setHandlerError("");
+  setCallerError("");
+  setNotesError("");
+};
   const save = async () => {
+    // additional checks
     if (!handler || !caller || !dateTime) {
       toast.error("Fill all required fields", { position: "top-center" });
+      return;
+    }
+
+    if (handlerError || callerError || notesError) {
+      toast.error("Fix validation errors before submitting", {
+        position: "top-center",
+      });
       return;
     }
 
@@ -32,18 +98,23 @@ function AddCallLogModal({ studentId, onSaved }) {
       callType,
       notes,
       duration: totalSeconds,
-      dateTime
+      dateTime,
     });
 
     toast.success("Call log added", { position: "top-center" });
+     resetForm();
     setShow(false);
     onSaved?.();
   };
 
   return (
     <>
-      <Button size="sm" variant="outline-primary" onClick={() => setShow(true)}>
-        Add  📞
+      <Button
+        size="sm"
+        variant="outline-primary"
+        onClick={() => setShow(true)}
+      >
+        Add 📞
       </Button>
 
       <Modal show={show} onHide={() => setShow(false)} centered>
@@ -66,20 +137,31 @@ function AddCallLogModal({ studentId, onSaved }) {
               />
             </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              placeholder="Handled by"
-              value={handler}
-              onChange={(e) => setHandler(e.target.value)}
-            />
+            {/* Call Initiator */}
+            <Form.Group className="mb-2">
+              <Form.Control
+                placeholder="Call Initiator"
+                value={handler}
+                onChange={handleHandlerChange}
+              />
+              {handlerError && (
+                <div className="text-danger small">{handlerError}</div>
+              )}
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              placeholder="Caller / Receiver"
-              value={caller}
-              onChange={(e) => setCaller(e.target.value)}
-            />
+            {/* Call Receiver */}
+            <Form.Group className="mb-2">
+              <Form.Control
+                placeholder="Call Receiver"
+                value={caller}
+                onChange={handleCallerChange}
+              />
+              {callerError && (
+                <div className="text-danger small">{callerError}</div>
+              )}
+            </Form.Group>
 
+            {/* Call Type */}
             <Form.Select
               className="mb-2"
               value={callType}
@@ -111,13 +193,19 @@ function AddCallLogModal({ studentId, onSaved }) {
               </div>
             </Form.Group>
 
-            <Form.Control
-              as="textarea"
-              rows={2}
-              placeholder="Notes (optional)"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
+            {/* Notes */}
+            <Form.Group className="mb-2">
+              <Form.Control
+                as="textarea"
+                rows={2}
+                placeholder="Notes ........"
+                value={notes}
+                onChange={handleNotesChange}
+              />
+              {notesError && (
+                <div className="text-danger small">{notesError}</div>
+              )}
+            </Form.Group>
           </Form>
         </Modal.Body>
 

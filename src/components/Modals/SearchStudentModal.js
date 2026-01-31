@@ -282,7 +282,15 @@ function SearchStudentModal({ show, onHide }) {
                                 <p key={i}>
                                   ₹{t.amount} via {t.method} on{" "}
                                   {t.dateTime
-                                    ? new Date(t.dateTime).toLocaleString()
+                                    ? new Date(t.dateTime).toLocaleString("en-IN", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                      hour: "numeric",
+                                      minute: "2-digit",
+                                      second: "2-digit",
+                                      hour12: true,
+                                    })
                                     : "-"}
                                 </p>
                               ))
