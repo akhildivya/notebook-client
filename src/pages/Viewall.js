@@ -256,9 +256,9 @@ const exportToPDF = () => {
 
         paymentDisplay = [
           `Status: ${pay.status || "-"}`,
-          `Total: ₹${pay.totalAmount ?? 0}`,
-          `Paid: ₹${paidAmount}`,
-          `Balance: ₹${remainingAmount}`
+          `Total: ${pay.totalAmount ?? 0}`,
+          `Paid: ${paidAmount}`,
+          `Balance: ${remainingAmount}`
         ].join("\n");
       } else {
         paymentDisplay = "No payment";

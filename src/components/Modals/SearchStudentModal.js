@@ -7,10 +7,15 @@ import { BASEURL } from "../../service/baseUrl";
 import axios from "axios";
 import searchStyles from "./SearchStudentModal.module.css"; // use this for modal-specific styles
 import { toast } from "react-toastify";
+import EditStudentModal from "./EditStudentModal";
+
 function SearchStudentModal({ show, onHide }) {
   const [searchName, setSearchName] = useState("");
   const [results, setResults] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
+
+  const [editStudent, setEditStudent] = useState(null);
+
   const ITEMS_PER_PAGE = 5;
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,8 +47,7 @@ function SearchStudentModal({ show, onHide }) {
     return () => clearTimeout(timeout);
   }, [searchName]);
   const handleEditStudent = (student) => {
-    console.log("Edit student:", student);
-    // open edit modal here
+   setEditStudent(student);
   };
 
   const handleDeleteStudent = (id) => {
@@ -354,6 +358,22 @@ function SearchStudentModal({ show, onHide }) {
           Close
         </Button>
       </Modal.Footer>
+
+      {editStudent && (
+  <EditStudentModal
+    student={editStudent}
+    onClose={() => setEditStudent(null)}
+    onUpdated={(updatedStudent) => {
+      setResults((prev) =>
+        prev.map((s) =>
+          s._id === updatedStudent._id ? updatedStudent : s
+        )
+      );
+      setEditStudent(null);
+    }}
+  />
+)}
+
     </Modal>
   );
 }

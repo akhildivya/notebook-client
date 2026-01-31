@@ -43,7 +43,7 @@ function HistoryStudentModal({ show, onHide }) {
             <Row className="mb-3">
               <Col>
                 <Card body className={historyStyles.summaryCard}>
-                  Total Contacts
+                   Contacts created
                   <div className={historyStyles.summaryValue}>{data.totalContacts}</div>
                 </Card>
               </Col>

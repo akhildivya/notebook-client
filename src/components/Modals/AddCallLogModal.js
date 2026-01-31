@@ -43,7 +43,7 @@ function AddCallLogModal({ studentId, onSaved }) {
   return (
     <>
       <Button size="sm" variant="outline-primary" onClick={() => setShow(true)}>
-        📞 Call Log
+        Add  📞
       </Button>
 
       <Modal show={show} onHide={() => setShow(false)} centered>

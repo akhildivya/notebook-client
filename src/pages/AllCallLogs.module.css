@@ -1,0 +1,41 @@
+.page {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 30px 0;
+}
+
+.container {
+  width: 75%;
+  margin: auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.student {
+  font-weight: 600;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 15px;
+}
+
+th {
+  cursor: pointer;
+  user-select: none;
+}
+
+th:hover {
+  background-color: #f1f1f1;
+}
